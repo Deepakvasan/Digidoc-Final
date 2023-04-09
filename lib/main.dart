@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/services/auth.dart';
 import 'screens/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,7 +11,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
               Color.fromARGB(1, 7, 58, 188),
             ),
             textTheme: TextTheme()),
-        home: Wrapper(),
+        home: const Wrapper(),
       ),
     );
   }

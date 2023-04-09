@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signup_login/screens/appointment_patient.dart';
 import 'package:signup_login/screens/doctor_page.dart';
 
 class DoctorProfile extends StatelessWidget {
@@ -14,7 +15,7 @@ class DoctorProfile extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => DoctorPage()),
+            MaterialPageRoute(builder: (context) => AppointmentPatient()),
           );
         },
         label: const Text('Book Appointment'),

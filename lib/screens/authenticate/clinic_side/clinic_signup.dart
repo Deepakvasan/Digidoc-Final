@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:signup_login/screens/clinic_home_wrapper.dart';
 import 'package:signup_login/screens/doctor_wrapper.dart';
 import 'package:signup_login/services/auth.dart';
 import 'package:signup_login/services/database.dart';
@@ -134,7 +135,7 @@ class _ClinicSignUpState extends State<ClinicSignUp> {
               //     .push(MaterialPageRoute(builder: (context) => Wrapper()));
 
               Navigator.of(context).pushReplacement(new MaterialPageRoute(
-                  builder: (BuildContext context) => DoctorWrapper()));
+                  builder: (BuildContext context) => ClinicHomeWrapper()));
               print(result.uid);
             }
           }

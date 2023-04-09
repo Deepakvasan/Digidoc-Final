@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '/models/user.dart';
 
@@ -41,17 +40,22 @@ class AuthService {
       return null;
     }
   }
+  // Future IsFirstTimeLogin()   {
 
+  // }
   Future registerWithEmailAndPassword(String? email, String? password) async {
     try {
+      print("password from auth function " + password!);
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email as String, password: password as String);
       User user = result.user!;
+      print("Successfully logged in");
       print(user);
 
       return _userFromFirebaseUser(user);
     } catch (e) {
       print(e.toString());
+      print("error");
       return null;
     }
   }
@@ -66,7 +70,7 @@ class AuthService {
     }
   }
 
-  getCurrentUserUid() {
+  String? getCurrentUserUid() {
     final User? user = _auth.currentUser;
     if (user != null) {
       // print("Returned user id " + user.uid);
@@ -74,5 +78,17 @@ class AuthService {
     } else {
       return null;
     }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      // Password reset email sent
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        // User not found
+        print("user not found");
+      } else {}
+    } catch (e) {}
   }
 }

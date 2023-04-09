@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/screens/user_type_wrapper.dart';
-import 'home_screen.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
-import 'authenticate/authenticate.dart';
-import 'package:signup_login/screens/choose_login_screen.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({super.key});
@@ -20,7 +17,7 @@ class Wrapper extends StatelessWidget {
     if (user == null) {
       return const LoginScreen();
     } else {
-      return UserTypeWrapper();
+      return const UserTypeWrapper();
     }
   }
 }

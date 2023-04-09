@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/services/auth.dart';
 
 class DoctorHome extends StatefulWidget {
@@ -20,6 +21,8 @@ class _DoctorHomeState extends State<DoctorHome> {
             TextButton.icon(
                 onPressed: () async {
                   await _auth.signOut();
+                  Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                      builder: (BuildContext context) => LoginScreen()));
                 },
                 icon: Icon(
                   Icons.person,
@@ -30,7 +33,7 @@ class _DoctorHomeState extends State<DoctorHome> {
                   style: TextStyle(color: Colors.black),
                 ))
           ]),
-      body: Text('doctor Home Page'),
+      body: Text('Doctor Home Page'),
     );
   }
 }
