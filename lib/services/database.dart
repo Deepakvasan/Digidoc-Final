@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class DatabaseService {
   final CollectionReference userCollection =
@@ -155,6 +156,10 @@ class DatabaseService {
     dynamic category = "";
     dynamic initialised = "";
     dynamic email = "";
+    dynamic consultationFee = "";
+    dynamic timings = {};
+    dynamic qualification = "";
+    dynamic consultationTime = "";
     late Map<String, dynamic> data;
     for (final clinic in clinicsQuerySnapshot.docs) {
       doctorsCollection = clinic.reference.collection("doctors");
@@ -166,14 +171,60 @@ class DatabaseService {
         phone = data['phone'];
         email = data['email'];
         initialised = data['initialised'];
+        consultationTime = data['consultationTime'];
+        consultationFee = data['consulationFee'];
         category = data['category'];
+        timings = data['timings'];
+        qualification = data['qualification'];
         break;
       }
     }
-    List<dynamic> details = [name, phone, email, category, initialised];
+    List<dynamic> details = [
+      name,
+      phone,
+      email,
+      category,
+      initialised,
+      consultationFee,
+      timings,
+      qualification,
+      consultationTime,
+    ];
     print("DETAILS ");
     print(details);
     return details;
+  }
+
+  Future createAppointment({
+    String? doctorUid,
+    String? patientUid,
+    String? consultationFee,
+    Map<String, int>? slotChosen,
+    Map<Map<String, int>?, String>? slotsDetails,
+    String? date,
+    String? sessionTime,
+  }) async {
+    var appointmentsCollection =
+        FirebaseFirestore.instance.collection("appointments");
+    final DocumentReference appointmentDocRef = appointmentsCollection.doc();
+    await appointmentDocRef.set({
+      'doctorUid': doctorUid,
+      'patientUid': patientUid,
+      'consultationFee': consultationFee,
+      'timeOfBooking': DateTime.now(),
+      'slotChosen': slotChosen,
+      'sessionTime': sessionTime,
+      'status': 'Booked',
+    });
+
+    String? appointmentId = appointmentDocRef.id;
+    slotsDetails![slotChosen!] = appointmentId;
+    var doctorRef = appointmentsCollection.doc('doctors').collection('doctors');
+    final DocumentReference doctorAppointmentDocRef = doctorRef.doc(doctorUid);
+    var dateRef = doctorAppointmentDocRef.collection("${date}");
+    await dateRef.doc().set({
+      'slots_details': slotsDetails,
+    });
   }
 
   Future updateDoctorProfile(
@@ -220,7 +271,8 @@ class DatabaseService {
     });
   }
 
-  Future updateDoctorTimings(Map<String, Map<String, dynamic>> schedule) async {
+  Future updateDoctorTimings(Map<String, Map<String, dynamic>> schedule,
+      String consultationTime) async {
     print("UID is $uid");
     var clinicsCollection = FirebaseFirestore.instance
         .collection("users")
@@ -241,7 +293,11 @@ class DatabaseService {
         break;
       }
     }
-    return await documentRef
-        .update({'timings': schedule, 'verified': true, 'complete': true});
+    return await documentRef.update({
+      'timings': schedule,
+      'verified': true,
+      'complete': true,
+      'consultationTime': consultationTime,
+    });
   }
 }

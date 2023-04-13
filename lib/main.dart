@@ -38,6 +38,10 @@ class MyApp extends StatelessWidget {
               secondaryContainer:
                   buildMaterialColor(Color.fromARGB(200, 50, 31, 83)),
             ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor),
+            ),
             cardColor: buildMaterialColor(
               Color.fromARGB(1, 7, 58, 188),
             ),

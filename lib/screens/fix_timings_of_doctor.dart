@@ -531,8 +531,9 @@ class _FixTimingsOfDoctorState extends State<FixTimingsOfDoctor> {
                                   DatabaseService _database =
                                       DatabaseService(uid: uid);
                                   try {
-                                    await _database
-                                        .updateDoctorTimings(_schedule);
+                                    await _database.updateDoctorTimings(
+                                        _schedule,
+                                        ConsultationTimeFeeController.text);
                                     print("Pushed to firebase");
                                     setState() {
                                       error = "";

@@ -1,20 +1,24 @@
+import 'package:signup_login/screens/appointment_patient.dart';
 import 'package:signup_login/screens/clinicCard.dart';
 import 'package:signup_login/screens/docCard.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:signup_login/screens/doctor_page.dart';
 import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/services/auth.dart';
 import 'package:signup_login/services/database.dart';
 
 class DoctorDetails {
+  String documentId;
   String designation;
   String name;
   String qualification;
 
   DoctorDetails(
-      {required this.designation,
+      {required this.documentId,
+      required this.designation,
       required this.name,
       required this.qualification});
 }
@@ -48,7 +52,7 @@ class _PatientHomeState extends State<PatientHome> {
     dynamic qualification = "";
     dynamic timings =
         ""; // do like get todays day and show his timings and only list if available in this time, if not available dont add in the list.
-
+    dynamic uid = "";
     for (final clinic in clinicsQuerySnapshot.docs) {
       doctorsCollection = clinic.reference.collection("doctors");
       final snapshot = await doctorsCollection.get();
@@ -57,6 +61,7 @@ class _PatientHomeState extends State<PatientHome> {
         print(timings);
         final doctorDetails = snapshot.docs
             .map((doc) => DoctorDetails(
+                  documentId: doc.id,
                   designation: doc['category'],
                   name: doc['name'],
                   qualification: doc['qualification'],
@@ -398,6 +403,7 @@ class _PatientHomeState extends State<PatientHome> {
                         } else if (snapshot.hasError) {
                           return const Text('Error');
                         } else {
+                          print(doctorDetailsList.length);
                           return Container(
                             height: 140.0,
                             child: ListView.builder(
@@ -405,10 +411,22 @@ class _PatientHomeState extends State<PatientHome> {
                               itemCount: doctorDetailsList.length,
                               itemBuilder: (context, index) {
                                 final doctorDetails = doctorDetailsList[index];
-                                return DocCard(
-                                  designation: doctorDetails.designation,
-                                  name: doctorDetails.name,
-                                  qualification: doctorDetails.qualification,
+                                return InkWell(
+                                  child: DocCard(
+                                    designation: doctorDetails.designation,
+                                    name: doctorDetails.name,
+                                    qualification: doctorDetails.qualification,
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DoctorPage(
+                                                DoctorUid:
+                                                    doctorDetails.documentId,
+                                              )),
+                                    );
+                                  },
                                 );
                               },
                             ),

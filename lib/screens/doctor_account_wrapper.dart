@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:signup_login/screens/doctor_home.dart';
 import 'package:signup_login/screens/doctor_profile_complete.dart';
 import 'package:signup_login/screens/patient_home.dart';
 import 'package:signup_login/screens/reset_page.dart';
@@ -51,7 +52,7 @@ class _DoctorAccountWrapperState extends State<DoctorAccountWrapper> {
             bool complete = snapshot.data!;
             if (complete == true) {
               //check further if account complete and then account verified
-              return PatientHome();
+              return DoctorHome();
             } else {
               return DoctorProfileComplete();
             }
