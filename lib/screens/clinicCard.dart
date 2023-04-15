@@ -30,7 +30,7 @@ class ClinicCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24.0,
-              backgroundImage: AssetImage("assets/Images/hospital.png"),
+              // backgroundImage: AssetImage("assets/Images/hospital.png"),
             ),
             Column(
               children: [

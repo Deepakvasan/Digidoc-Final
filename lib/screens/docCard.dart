@@ -31,7 +31,7 @@ class DocCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24.0,
-              backgroundImage: AssetImage("assets/Images/man.png"),
+              // backgroundImage: AssetImage("assets/Images/man.png"),
             ),
             Column(
               children: [

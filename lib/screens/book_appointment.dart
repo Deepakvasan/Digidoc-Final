@@ -44,6 +44,7 @@ class _BookAppointmentState extends State<BookAppointment> {
   }
 
   bool _noOtherChoosen(Map<Map<String, int>?, String> slotsChosen) {
+    print(slotsChosen);
     slotChosen =
         slotsChosen.map((key, value) => MapEntry(key, value.toString()));
 
@@ -55,10 +56,9 @@ class _BookAppointmentState extends State<BookAppointment> {
     return true;
   }
 
-  Map<String, int>? _getTimeOfChosenSlot(
-      Map<Map<String, int>?, String> slotChosen) {
+  Map<String, int>? _getTimeOfChosenSlot(var sortedMap) {
     Map<String, int>? result = timeOfDayToMap(TimeOfDay(hour: 0, minute: 0));
-    slotChosen.forEach((key, value) {
+    sortedMap.forEach((key, value) {
       if (value == "1") {
         result = key;
       }
@@ -66,9 +66,14 @@ class _BookAppointmentState extends State<BookAppointment> {
     return result;
   }
 
-  List<TimeOfDay> slots = [];
+  List<Map<String, int>?> slots = [];
   bool slotChosenInitialised = false;
+  bool firstTime = false;
+
   Map<Map<String, int>?, String> slotChosen = {};
+  var slotsChosen;
+  List<Color> containerColors = []; // new list for container colors
+
   // Map<Map<String, int>, String> finalSlotChosen ={};
   //this is the map that will be reterieved from the database and pushed into the database.
   Widget _bookSlotWidget(var schedule, String consultationTime) {
@@ -83,7 +88,6 @@ class _BookAppointmentState extends State<BookAppointment> {
 
     // Calculate number of slots
     int numSlots = (endMinutes - startMinutes) ~/ slotTime;
-    List<Color> containerColors = []; // new list for container colors
 
     // Divide into slots
     for (int i = 0; i < numSlots; i++) {
@@ -93,14 +97,14 @@ class _BookAppointmentState extends State<BookAppointment> {
           hour: slotStartMinutes ~/ 60, minute: slotStartMinutes % 60);
       TimeOfDay slotEndTime =
           TimeOfDay(hour: slotEndMinutes ~/ 60, minute: slotEndMinutes % 60);
-      slots.add(slotStartTime);
-      containerColors.add(Colors.grey[300]!); // initialize each color to grey
-
+      slots.add(timeOfDayToMap(slotStartTime));
     }
     print(slots);
     if (!slotChosenInitialised) {
       for (int i = 0; i < slots.length; i++) {
-        slotChosen.addAll({timeOfDayToMap(slots[i]): "0"});
+        slotChosen.addAll({slots[i]: "0"});
+        containerColors.add(Colors.grey[300]!); // initialize each color to grey
+
         // slotChosen[timeOfDayToMap(slots[i])] = "0";
       }
       slotChosenInitialised = true;
@@ -112,7 +116,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     var doctorRef = appointmentsCollection.doc('doctors').collection('doctors');
     final DocumentReference doctorAppointmentDocRef =
         doctorRef.doc(widget.doctorUid);
-    var dateRef = doctorAppointmentDocRef.collection("${date}");
+    var dateRef = doctorAppointmentDocRef.collection("$date");
     AuthService _auth = AuthService();
     return FutureBuilder(
         future: dateRef.get(),
@@ -129,18 +133,58 @@ class _BookAppointmentState extends State<BookAppointment> {
               print("No Documents");
               //retaining the slotChosen to all 0s
             } else {
-              slotChosen = querySnapshot.docs[0].get('slots');
-              print("TYPE TYPE");
-              print(slotChosen.runtimeType);
+              if (!firstTime) {
+                slotChosen = {};
+                slotsChosen = querySnapshot.docs[0].get('slotsDetails');
+                print("TYPE TYPE");
+
+                slotsChosen.forEach((key, value) {
+                  print(key);
+                  print(" ");
+                  print(value);
+                  String hr = key.split(",")[0];
+                  hr = hr.split(": ")[1];
+                  print(hr);
+                  String min = key.split(",")[1];
+                  min = min.split(": ")[1];
+                  min = min.split("}")[0];
+                  print(min);
+                  int hour = int.parse(hr);
+                  int minute = int.parse(min);
+                  print(hour);
+                  print(minute);
+                  print(value);
+
+                  slotChosen[{'hour': hour, 'minute': minute}] = value;
+                });
+
+                print(slotChosen);
+                print(slotChosen.runtimeType);
+                print(slotsChosen.runtimeType);
+                firstTime = true;
+              }
             }
 
             print("SLOTS CHOSEN");
-            print(slotChosen);
-            print(slots);
-            List<Map<String, int>?> slot = [];
-            for (int i = 0; i < slots.length; i++) {
-              slot.add(timeOfDayToMap(slots[i]));
-            }
+            // print(slotChosen);
+            var sortedMap = Map.fromEntries(slotChosen.entries.toList()
+              ..sort((a, b) {
+                var aHour = a.key!['hour'];
+                var bHour = b.key!['hour'];
+                var aMinute = a.key!['minute'];
+                var bMinute = b.key!['minute'];
+                if (aHour == bHour) {
+                  return aMinute!.compareTo(bMinute!);
+                } else {
+                  return aHour!.compareTo(bHour!);
+                }
+              }));
+            print(sortedMap);
+            // print(slots);
+            // List<Map<String, int>?> slot = [];
+            // for (int i = 0; i < slots.length; i++) {
+            //   slot.add(slots[i]);
+            // }
 
             return Expanded(
               child: ListView(
@@ -149,14 +193,26 @@ class _BookAppointmentState extends State<BookAppointment> {
                     crossAxisCount: 4,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    children: List.generate(slot.length, (index) {
+                    children: List.generate(slots.length, (index) {
                       // Map<String, int>? slotKey = slot[index];
-                      final slotValue = slotChosen[slot[index]];
+                      // slotValue = slotChosen[slot[index]];
+                      // print("SLOT VALUE");
+                      // print(slotChosen);
+                      print("SORTED MAP");
+                      print(sortedMap);
+                      dynamic ind = sortedMap.keys.elementAt(index);
+                      print(ind);
+                      var slotValue = sortedMap.values.elementAt(index);
+                      // print(slot[index]);
+                      // print(slot[index].runtimeType);
+                      // var slotValues = slotChosen.values;
+                      // var slotKeys = slotChosen.keys;
+                      // final slotValue = slotValues.elementAt(index);
                       print("SLOT VALUE");
-                      print(slot[index]);
-                      print(slot[index].runtimeType);
-
                       print(slotValue);
+                      print(slotValue.runtimeType);
+
+                      // print(slotValue.runtimeType);
                       // print(slotChosen.containsKey(slotKey));
                       // print(slotChosen[slotKey]);
                       return InkWell(
@@ -172,19 +228,20 @@ class _BookAppointmentState extends State<BookAppointment> {
                           ),
                           child: Center(
                             child: Text(
-                              slots[index].format(context),
+                              "${slots[index]!['hour']}:${slots[index]!['minute']}",
                               style: TextStyle(fontSize: 18),
                             ),
                           ),
                         ),
-                        onTap: slotValue != null && slotValue.length <= 5
+                        onTap: slotValue.length <= 2
                             ? () {
+                                print("PRESSED");
                                 print(slots);
-                                print(slotChosen);
-                                if (_noOtherChoosen(slotChosen)) {
-                                  print(slotChosen);
+                                print(sortedMap);
+                                if (_noOtherChoosen(sortedMap)) {
+                                  print(sortedMap);
                                   setState(() {
-                                    slotChosen[slot[index]] = "1";
+                                    slotChosen[ind] = "1";
                                   });
                                   print("CHANGED ");
                                   print(slotChosen);
@@ -229,24 +286,35 @@ class _BookAppointmentState extends State<BookAppointment> {
         });
   }
 
+  bool patientFree(var slotChosed, var date) {
+    DatabaseService _database = DatabaseService();
+    _database.isPatientFree(slotChosed, date);
+    return false;
+  }
+
   Widget _bookAppointmentButton() {
     Map<String, int>? SlotChosed = _getTimeOfChosenSlot(slotChosen);
     String? date = widget.date!.split(" ")[0] +
+        "," +
         widget.date!.split(" ")[1] +
+        "," +
         widget.date!.split(" ")[3];
     print("Date <- this will be a document id" + date);
     return ElevatedButton(
         child: Text("Book Appointment"),
         onPressed: () {
-          _database.createAppointment(
-            doctorUid: widget.doctorUid,
-            patientUid: widget.patientUid,
-            consultationFee: widget.doctorDetails[5],
-            slotChosen: SlotChosed,
-            slotsDetails: slotChosen,
-            date: date,
-            sessionTime: widget.doctorDetails[8],
-          );
+          //check whether this slot already booked by patient in some other appointment.
+          if (patientFree(SlotChosed, date)) {
+            _database.createAppointment(
+              doctorUid: widget.doctorUid,
+              patientUid: widget.patientUid,
+              consultationFee: widget.doctorDetails[5],
+              slotChosen: SlotChosed,
+              slotsDetails: slotChosen,
+              date: date,
+              sessionTime: widget.doctorDetails[8],
+            );
+          }
           //Now I have to update the necessary things based on slot chosen, doctor uid, patient Uid, consultation fee, time of booking, and then create an appointment and get the appointment id and add it into a field in patients record, and add to the appointmnets collection -> doctor uid -> date -> time slot -> appointment Id.
           //seperately appointment id -> docUid, PatientUid, consultation Fee, Time choosen, session time, feedback, doctor Diagnosis, prescription.
         });

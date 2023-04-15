@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:signup_login/services/auth.dart';
 
 class DatabaseService {
   final CollectionReference userCollection =
@@ -24,6 +25,7 @@ class DatabaseService {
     });
   }
 
+  AuthService _auth = AuthService();
   Future getPatientName(String? uid) async {
     DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
     if (documentSnapshot.exists) {
@@ -195,12 +197,20 @@ class DatabaseService {
     return details;
   }
 
+  Future isPatientFree(var slotchosed, var date) async {
+    String? uid = _auth.getCurrentUserUid();
+    final docRef = FirebaseFirestore.instance.collection("users").doc(uid);
+    var data = await docRef.get();
+    print("data");
+    var listOfAppointments = data.data()!["appointmentId"];
+  }
+
   Future createAppointment({
     String? doctorUid,
     String? patientUid,
     String? consultationFee,
     Map<String, int>? slotChosen,
-    Map<Map<String, int>?, String>? slotsDetails,
+    Map<dynamic, String>? slotsDetails,
     String? date,
     String? sessionTime,
   }) async {
@@ -214,17 +224,44 @@ class DatabaseService {
       'timeOfBooking': DateTime.now(),
       'slotChosen': slotChosen,
       'sessionTime': sessionTime,
+      'date': date,
       'status': 'Booked',
     });
 
-    String? appointmentId = appointmentDocRef.id;
+    String appointmentId = appointmentDocRef.id;
+    print(slotChosen);
     slotsDetails![slotChosen!] = appointmentId;
+    print(slotsDetails);
     var doctorRef = appointmentsCollection.doc('doctors').collection('doctors');
     final DocumentReference doctorAppointmentDocRef = doctorRef.doc(doctorUid);
-    var dateRef = doctorAppointmentDocRef.collection("${date}");
-    await dateRef.doc().set({
-      'slots_details': slotsDetails,
+    var dateRef = doctorAppointmentDocRef.collection("$date");
+    final Map<String, dynamic> serializedSlotsDetails = {};
+    slotsDetails.forEach((key, value) {
+      if (key != null) {
+        serializedSlotsDetails[key.toString()] = value;
+      }
     });
+    QuerySnapshot snapshot = await dateRef.get();
+    if (snapshot.docs.length > 0) {
+      String documentId = snapshot.docs[0].id;
+      // use the documentId to update the document
+      await dateRef.doc(documentId).set({
+        'slotsDetails': serializedSlotsDetails,
+      });
+    } else {
+      await dateRef.doc().set({
+        'slotsDetails': serializedSlotsDetails,
+      });
+    }
+
+    print("Uploaded to appointments collection");
+    var patientCollection = FirebaseFirestore.instance.collection("users");
+    final DocumentReference patientDocRef = patientCollection.doc(patientUid);
+    print(patientUid);
+    await patientDocRef.update({
+      'appointmentId': FieldValue.arrayUnion([appointmentId]),
+    });
+    print("Uploaded to patient collection");
   }
 
   Future updateDoctorProfile(

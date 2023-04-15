@@ -31,7 +31,7 @@ class _UserTypeWrapperState extends State<UserTypeWrapper> {
   void fetchUserType() async {
     try {
       uid = _auth.getCurrentUserUid();
-      print(uid);
+      // print(uid);
       DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (mounted) {
@@ -69,7 +69,7 @@ class _UserTypeWrapperState extends State<UserTypeWrapper> {
     // final user = Provider.of<UserModel?>(context);
     //return either home or authenticate widget based on auth status
     fetchUserType();
-    print("userType =" + userType);
+    // print("userType =" + userType);
 
     if (userType == 'patient') {
       return Home();

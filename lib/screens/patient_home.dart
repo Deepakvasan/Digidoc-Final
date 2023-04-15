@@ -1,6 +1,8 @@
+import 'package:flutter/scheduler.dart';
 import 'package:signup_login/screens/appointment_patient.dart';
 import 'package:signup_login/screens/clinicCard.dart';
 import 'package:signup_login/screens/docCard.dart';
+import 'package:signup_login/screens/appointmentCard.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,26 @@ class DoctorDetails {
       required this.qualification});
 }
 
+class AppointmentDetails {
+  dynamic slotBooked;
+  dynamic doctorUid;
+  dynamic sessionTime;
+  dynamic consultationFee;
+  dynamic timeOfBooking;
+  dynamic bookingStatus;
+  dynamic date;
+
+  AppointmentDetails({
+    required this.slotBooked,
+    required this.doctorUid,
+    required this.sessionTime,
+    required this.consultationFee,
+    required this.bookingStatus,
+    required this.timeOfBooking,
+    required this.date,
+  });
+}
+
 class PatientHome extends StatefulWidget {
   const PatientHome({Key? key}) : super(key: key);
 
@@ -31,12 +53,59 @@ class PatientHome extends StatefulWidget {
 }
 
 class _PatientHomeState extends State<PatientHome> {
+  late Future<void> _future;
+
   late DatabaseService _database;
 
   AuthService _auth = AuthService();
   String? uid;
   dynamic patientName = null;
   List<DoctorDetails> doctorDetailsList = [];
+  List<AppointmentDetails> appointmentDetailsList = [];
+  Future<void> _retrieveAppointmentDetails() async {
+    var appointmentsCollection =
+        FirebaseFirestore.instance.collection("appointments");
+    var appointmentQuerySnapshot = await appointmentsCollection.get();
+    dynamic slotBooked = {};
+    dynamic doctorUid = "";
+    dynamic consultationFee = "";
+    dynamic sessionTime = "";
+    dynamic timeOfBooking;
+    dynamic bookingStatus;
+    var appointmentDetails;
+    appointmentDetailsList = [];
+    if (appointmentQuerySnapshot.docs.isNotEmpty) {
+      // print(appointmentQuerySnapshot.docs.elementAt(0)["doctorUid"]);
+      print("HERE HERE");
+      // Iterate over the list of documents and get the document ID for each one
+      // var docId = docSnapshot.id;
+      // if (docId != "doctor") {
+      appointmentDetails = appointmentQuerySnapshot.docs
+          .where((doc) => doc.id != "doctors")
+          .map((doc) => AppointmentDetails(
+                slotBooked: doc['slotChosen'],
+                consultationFee: doc['consultationFee'],
+                sessionTime: doc['sessionTime'],
+                bookingStatus: doc['status'],
+                timeOfBooking: doc['timeOfBooking'],
+                doctorUid: doc['doctorUid'],
+                date: doc['date'],
+              ))
+          .toList();
+
+      print(appointmentDetails);
+      print(appointmentDetails);
+      appointmentDetailsList
+          .addAll(appointmentDetails.cast<AppointmentDetails>());
+
+      print("Appointment List");
+      print(appointmentDetailsList);
+    } else {
+      print('No documents found in the appointments collection.');
+    }
+
+    // do like get todays day and show his timings and only list if available in this time, if not available dont add in the list.
+  }
 
   Future<void> _retrieveDoctorDetails() async {
     var clinicsCollection = FirebaseFirestore.instance
@@ -151,6 +220,7 @@ class _PatientHomeState extends State<PatientHome> {
   void initState() {
     super.initState();
     _getCurrentPosition();
+    _future = _retrieveAppointmentDetails();
     print(lat);
     print(long);
   }
@@ -178,7 +248,7 @@ class _PatientHomeState extends State<PatientHome> {
 
     print(doctorDetailsList);
     print(doctorDetailsList.length);
-
+    print(appointmentDetailsList.length);
     // _auth.signOut();
     // Navigator.of(context).pushReplacement(new MaterialPageRoute(
     //     builder: (BuildContext context) => LoginScreen()));
@@ -190,300 +260,385 @@ class _PatientHomeState extends State<PatientHome> {
             var name = snapshot.data!['name'];
             print(name);
             return Material(
-              child: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Greetings ${name}!",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.pin_drop_rounded,
+              child: SingleChildScrollView(
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Greetings ${name}!",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Guindy,",
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text("Chennai")
-                                  ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.pin_drop_rounded,
                                 ),
-                              )
-                            ],
-                          )
-                        ],
+                                Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        "Guindy,",
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text("Chennai")
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                      SizedBox(
+                        height: 10,
+                      ),
 
-                    Container(
-                      margin:
-                          EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
-                      padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 1.0,
-                            color: Colors.black,
-                          ),
-                          borderRadius: BorderRadius.circular(50)),
-                      child: SizedBox(
-                        height: 30.0,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Search for doctors and clinics near you",
-                            border: InputBorder.none,
-                            prefixIcon: Icon(Icons.search),
-                            prefixIconColor: Colors.black,
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 15.0, vertical: 5.0),
+                        padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1.0,
+                              color: Colors.black,
+                            ),
+                            borderRadius: BorderRadius.circular(50)),
+                        child: SizedBox(
+                          height: 30.0,
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText:
+                                  "Search for doctors and clinics near you",
+                              border: InputBorder.none,
+                              prefixIcon: Icon(Icons.search),
+                              prefixIconColor: Colors.black,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      height: 125,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          InkWell(
-                            onTap: () {},
-                            child: Container(
-                              width: 150,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    Color(0xff6c59b0),
-                                    Color(0xffa9a2f7),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        height: 125,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            InkWell(
+                              onTap: () {},
+                              child: Container(
+                                width: 150,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: [
+                                      Color(0xff6c59b0),
+                                      Color(0xffa9a2f7),
+                                    ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      offset: Offset(2.0, 5.0),
+                                      blurRadius: 10.0,
+                                    )
                                   ],
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    offset: Offset(2.0, 5.0),
-                                    blurRadius: 10.0,
-                                  )
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 28,
-                                    backgroundColor: Colors.white,
-                                    backgroundImage: AssetImage(
-                                        "assets/Images/clinicIcon.png"),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        "Clinic Visit",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    // CircleAvatar(
+                                    //   radius: 28,
+                                    //   backgroundColor: Colors.white,
+                                    //   backgroundImage: AssetImage(
+                                    //       "assets/Images/clinicIcon.png"),
+                                    // ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          "Clinic Visit",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        "Book an appointment",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white,
+                                        Text(
+                                          "Book an appointment",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {},
-                            child: Container(
-                              width: 150,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    Color(0xffaf4844),
-                                    Color(0xff733734),
+                                      ],
+                                    )
                                   ],
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    offset: Offset(2.0, 5.0),
-                                    blurRadius: 10.0,
-                                  )
-                                ],
                               ),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 28,
-                                    backgroundColor: Colors.white,
-                                    backgroundImage:
-                                        AssetImage("assets/Images/danger.png"),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        "Emergency",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        "Call an ambulance",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                            ),
+                            InkWell(
+                              onTap: () {},
+                              child: Container(
+                                width: 150,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.centerLeft,
+                                    end: Alignment.centerRight,
+                                    colors: [
+                                      Color(0xffaf4844),
+                                      Color(0xff733734),
                                     ],
-                                  )
-                                ],
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      offset: Offset(2.0, 5.0),
+                                      blurRadius: 10.0,
+                                    )
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    // CircleAvatar(
+                                    //   radius: 28,
+                                    //   backgroundColor: Colors.white,
+                                    //   backgroundImage: AssetImage(
+                                    //       "assets/Images/danger.png"),
+                                    // ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          "Emergency",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Call an ambulance",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30.0,
+                      ),
+
+                      // Doctors listview
+                      Container(
+                        padding: EdgeInsets.only(left: 25.0),
+                        child: Text(
+                          "Popular Doctors near you",
+                          style: TextStyle(
+                              fontSize: 22.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      FutureBuilder<void>(
+                        future: _retrieveDoctorDetails(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return const Text('Error');
+                          } else {
+                            print(doctorDetailsList.length);
+                            return Container(
+                              height: 140.0,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: doctorDetailsList.length,
+                                itemBuilder: (context, index) {
+                                  final doctorDetails =
+                                      doctorDetailsList[index];
+                                  return InkWell(
+                                    child: DocCard(
+                                      designation: doctorDetails.designation,
+                                      name: doctorDetails.name,
+                                      qualification:
+                                          doctorDetails.qualification,
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => DoctorPage(
+                                                  DoctorUid:
+                                                      doctorDetails.documentId,
+                                                )),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      // Container(
+                      //   height: 140.0,
+                      //   child: ListView.builder(
+                      //     scrollDirection: Axis.horizontal,
+                      //     itemCount: doctorDetailsList.length,
+                      //     itemBuilder: (context, index) {
+                      //       final doctorDetails = doctorDetailsList[index];
+                      //       return DocCard(
+                      //         designation: doctorDetails.designation,
+                      //         name: doctorDetails.name,
+                      //         qualification: doctorDetails.qualification,
+                      //       );
+                      //     },
+                      //   ),
+                      // ),
+                      SizedBox(
+                        height: 30.0,
+                      ),
+
+                      // Clinics listview
+
+                      Container(
+                        padding: EdgeInsets.only(left: 25.0),
+                        child: Text(
+                          "Popular Clinics near you",
+                          style: TextStyle(
+                              fontSize: 22.0, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      Container(
+                        height: 140.0,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            ClinicCard(
+                              name: "ABC Clinic",
+                              rating: "4.3",
+                            ),
+                            ClinicCard(
+                              name: "PQR Clinic",
+                              rating: "4.1",
+                            ),
+                            ClinicCard(name: "Apollo 24x7", rating: "4.5")
+                          ],
+                        ),
+                      ),
+
+                      //Appointment List View
+                      SizedBox(height: 30.0),
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Your Active Appointments",
+                              style: TextStyle(
+                                  fontSize: 22.0, fontWeight: FontWeight.bold),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _future = _retrieveAppointmentDetails();
+                                  });
+                                },
+                                child: const Text('Reload'),
                               ),
                             ),
-                          )
-                        ],
+                          ],
+                        ),
+                        padding: EdgeInsets.only(left: 25.0),
+                      ), //Either Status is Booked or status is
+                      SizedBox(
+                        height: 15,
                       ),
-                    ),
-                    SizedBox(
-                      height: 30.0,
-                    ),
-
-                    // Doctors listview
-                    Container(
-                      padding: EdgeInsets.only(left: 25.0),
-                      child: Text(
-                        "Popular Doctors near you",
-                        style: TextStyle(
-                            fontSize: 22.0, fontWeight: FontWeight.bold),
+                      FutureBuilder<void>(
+                        future: _retrieveAppointmentDetails(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text("${snapshot.error}");
+                          } else {
+                            print("APPOINTMENT");
+                            print(appointmentDetailsList.length);
+                            print(appointmentDetailsList);
+                            return Container(
+                              height: 140.0,
+                              child: ListView.builder(
+                                // physics: NeverScrollableScrollPhysics(),
+                                // scrollDirection: Axis.vertical,
+                                itemCount: appointmentDetailsList.length,
+                                itemBuilder: (context, index) {
+                                  print("INDEX");
+                                  print(index);
+                                  final appointmentDetails =
+                                      appointmentDetailsList[index];
+                                  return InkWell(
+                                    child: AppointmentCard(
+                                      doctorName: appointmentDetails.doctorUid,
+                                      slotTime: appointmentDetails.slotBooked,
+                                      sessionTime:
+                                          appointmentDetails.sessionTime,
+                                      consultationFee:
+                                          appointmentDetails.consultationFee,
+                                      date: appointmentDetails.date,
+                                    ),
+                                    onTap: () {
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //       builder: (context) => DoctorPage(
+                                      //             DoctorUid:
+                                      //                 doctorDetails.documentId,
+                                      //           )),
+                                      // );
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        },
                       ),
-                    ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    FutureBuilder<void>(
-                      future: _retrieveDoctorDetails(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return const Text('Error');
-                        } else {
-                          print(doctorDetailsList.length);
-                          return Container(
-                            height: 140.0,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: doctorDetailsList.length,
-                              itemBuilder: (context, index) {
-                                final doctorDetails = doctorDetailsList[index];
-                                return InkWell(
-                                  child: DocCard(
-                                    designation: doctorDetails.designation,
-                                    name: doctorDetails.name,
-                                    qualification: doctorDetails.qualification,
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => DoctorPage(
-                                                DoctorUid:
-                                                    doctorDetails.documentId,
-                                              )),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    // Container(
-                    //   height: 140.0,
-                    //   child: ListView.builder(
-                    //     scrollDirection: Axis.horizontal,
-                    //     itemCount: doctorDetailsList.length,
-                    //     itemBuilder: (context, index) {
-                    //       final doctorDetails = doctorDetailsList[index];
-                    //       return DocCard(
-                    //         designation: doctorDetails.designation,
-                    //         name: doctorDetails.name,
-                    //         qualification: doctorDetails.qualification,
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
-                    SizedBox(
-                      height: 30.0,
-                    ),
-
-                    // Clinics listview
-
-                    Container(
-                      padding: EdgeInsets.only(left: 25.0),
-                      child: Text(
-                        "Popular Clinics near you",
-                        style: TextStyle(
-                            fontSize: 22.0, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Container(
-                      height: 140.0,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          ClinicCard(
-                            name: "ABC Clinic",
-                            rating: "4.3",
-                          ),
-                          ClinicCard(
-                            name: "PQR Clinic",
-                            rating: "4.1",
-                          ),
-                          ClinicCard(name: "Apollo 24x7", rating: "4.5")
-                        ],
-                      ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
