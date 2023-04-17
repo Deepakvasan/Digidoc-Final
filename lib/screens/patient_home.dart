@@ -136,7 +136,7 @@ class _PatientHomeState extends State<PatientHome> {
         print("Entered Clinic");
         print(clinic.id);
         print(snapshot.docs[0].id);
-        print(snapshot.docs[1].id);
+        // print(snapshot.docs[1].id);
         final doctorDetails = snapshot.docs
             .map((doc) => DoctorDetails(
                   documentId: doc.id,

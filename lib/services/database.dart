@@ -202,67 +202,72 @@ class DatabaseService {
     final docRef = FirebaseFirestore.instance.collection("users").doc(uid);
     var data = await docRef.get();
     print("data");
-    var listOfAppointments = data.data()!["appointmentId"];
     bool result = true;
-    for (var appointmentId in listOfAppointments) {
-      print(appointmentId);
-      final appointmentsRef = FirebaseFirestore.instance
-          .collection("appointments")
-          .doc(appointmentId);
 
-      var data = await appointmentsRef.get();
-      var slot = data.data()!["slotChosen"];
-      print(slot.runtimeType);
-      print(slot['hour']);
-      print(slot['hour'].runtimeType);
+    if (data.exists && data.data()!.containsKey("appointmentId")) {
+      var listOfAppointments = data.data()!["appointmentId"];
+      for (var appointmentId in listOfAppointments) {
+        print(appointmentId);
+        final appointmentsRef = FirebaseFirestore.instance
+            .collection("appointments")
+            .doc(appointmentId);
 
-      var dates = data.data()!["date"];
-      var session = data.data()!["sessionTime"];
-      print(slotchosed['hour'].runtimeType);
-      int maxChosedTimeHour = slotchosed['hour'];
-      int maxChosedTimeMinutes = slotchosed['minute'] + int.parse(sessionTime);
-      if (maxChosedTimeMinutes > 60) {
-        maxChosedTimeHour = maxChosedTimeHour + maxChosedTimeMinutes ~/ 60;
-        maxChosedTimeMinutes = maxChosedTimeMinutes + maxChosedTimeMinutes % 60;
-      }
-      print(dates);
-      print(date);
-      var maxExistingTimeHour = slot['hour'];
-      var maxExistingTimeMinutes = slot['minute'] + int.parse(session);
-      if (maxExistingTimeMinutes > 60) {
-        maxExistingTimeHour =
-            maxExistingTimeHour + (maxExistingTimeMinutes ~/ 60);
-        maxExistingTimeMinutes =
-            maxExistingTimeMinutes + maxExistingTimeMinutes % 60;
-      }
+        var data = await appointmentsRef.get();
+        var slot = data.data()!["slotChosen"];
+        print(slot.runtimeType);
+        print(slot['hour']);
+        print(slot['hour'].runtimeType);
 
-      var slotChosedStartingMinutes =
-          slotchosed['hour'] * 60 + slotchosed['minute'];
-      var slotChosedEndingMinutes =
-          maxChosedTimeHour * 60 + maxChosedTimeMinutes;
-
-      var existingStartingMinutes = slot['hour'] * 60 + slot['minute'];
-      var existingEndingMinutes =
-          maxExistingTimeHour * 60 + maxExistingTimeMinutes;
-      if (dates == date) {
-        print("INSIDE DATES");
-        print(existingStartingMinutes.runtimeType);
-        print(existingEndingMinutes);
-        print(slotChosedStartingMinutes);
-        print(slotChosedEndingMinutes);
-        if (existingStartingMinutes <= slotChosedStartingMinutes &&
-            slotChosedStartingMinutes <= existingEndingMinutes) {
-          print("result turned false");
-          result = false;
-        } else if (slotChosedStartingMinutes <= existingStartingMinutes &&
-            existingStartingMinutes <= slotChosedEndingMinutes) {
-          result = false;
+        var dates = data.data()!["date"];
+        var session = data.data()!["sessionTime"];
+        print(slotchosed['hour'].runtimeType);
+        int maxChosedTimeHour = slotchosed['hour'];
+        int maxChosedTimeMinutes =
+            slotchosed['minute'] + int.parse(sessionTime);
+        if (maxChosedTimeMinutes > 60) {
+          maxChosedTimeHour = maxChosedTimeHour + maxChosedTimeMinutes ~/ 60;
+          maxChosedTimeMinutes =
+              maxChosedTimeMinutes + maxChosedTimeMinutes % 60;
         }
+        print(dates);
+        print(date);
+        var maxExistingTimeHour = slot['hour'];
+        var maxExistingTimeMinutes = slot['minute'] + int.parse(session);
+        if (maxExistingTimeMinutes > 60) {
+          maxExistingTimeHour =
+              maxExistingTimeHour + (maxExistingTimeMinutes ~/ 60);
+          maxExistingTimeMinutes =
+              maxExistingTimeMinutes + maxExistingTimeMinutes % 60;
+        }
+
+        var slotChosedStartingMinutes =
+            slotchosed['hour'] * 60 + slotchosed['minute'];
+        var slotChosedEndingMinutes =
+            maxChosedTimeHour * 60 + maxChosedTimeMinutes;
+
+        var existingStartingMinutes = slot['hour'] * 60 + slot['minute'];
+        var existingEndingMinutes =
+            maxExistingTimeHour * 60 + maxExistingTimeMinutes;
+        if (dates == date) {
+          print("INSIDE DATES");
+          print(existingStartingMinutes.runtimeType);
+          print(existingEndingMinutes);
+          print(slotChosedStartingMinutes);
+          print(slotChosedEndingMinutes);
+          if (existingStartingMinutes <= slotChosedStartingMinutes &&
+              slotChosedStartingMinutes <= existingEndingMinutes) {
+            print("result turned false");
+            result = false;
+          } else if (slotChosedStartingMinutes <= existingStartingMinutes &&
+              existingStartingMinutes <= slotChosedEndingMinutes) {
+            result = false;
+          }
+        }
+        // var datas = appointmentsCollectionRef.get().data()![];
       }
-      // var datas = appointmentsCollectionRef.get().data()![];
+      print("RETURNED RESULT");
+      print(result);
     }
-    print("RETURNED RESULT");
-    print(result);
     return result;
   }
 
