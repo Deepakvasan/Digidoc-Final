@@ -43,6 +43,8 @@ class _BookAppointmentState extends State<BookAppointment> {
     };
   }
 
+  bool isLoading = false;
+  bool freeError = true;
   bool _noOtherChoosen(Map<Map<String, int>?, String> slotsChosen) {
     print(slotsChosen);
     slotChosen =
@@ -111,7 +113,9 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
 
     String? date = widget.date!.split(" ")[0] +
+        "," +
         widget.date!.split(" ")[1] +
+        "," +
         widget.date!.split(" ")[3];
     var doctorRef = appointmentsCollection.doc('doctors').collection('doctors');
     final DocumentReference doctorAppointmentDocRef =
@@ -286,10 +290,11 @@ class _BookAppointmentState extends State<BookAppointment> {
         });
   }
 
-  bool patientFree(var slotChosed, var date) {
+  Future<bool> patientFree(var slotChosed, var date, var sessionTime) async {
     DatabaseService _database = DatabaseService();
-    _database.isPatientFree(slotChosed, date);
-    return false;
+    bool result = await _database.isPatientFree(slotChosed, date, sessionTime);
+    print(result);
+    return result;
   }
 
   Widget _bookAppointmentButton() {
@@ -302,10 +307,18 @@ class _BookAppointmentState extends State<BookAppointment> {
     print("Date <- this will be a document id" + date);
     return ElevatedButton(
         child: Text("Book Appointment"),
-        onPressed: () {
-          //check whether this slot already booked by patient in some other appointment.
-          if (patientFree(SlotChosed, date)) {
-            _database.createAppointment(
+        onPressed: () async {
+          setState(() {
+            isLoading = true;
+            freeError = false;
+          });
+
+          bool isFree =
+              await patientFree(SlotChosed, date, widget.doctorDetails[8]);
+
+          if (isFree) {
+            print("BOOKING THE APPOINTMENT");
+            await _database.createAppointment(
               doctorUid: widget.doctorUid,
               patientUid: widget.patientUid,
               consultationFee: widget.doctorDetails[5],
@@ -314,7 +327,15 @@ class _BookAppointmentState extends State<BookAppointment> {
               date: date,
               sessionTime: widget.doctorDetails[8],
             );
+          } else {
+            print("no free time");
           }
+          setState(() {
+            isLoading = false;
+            freeError = isFree;
+          });
+          // if (await patientFree(SlotChosed, date, widget.doctorDetails[8]) ==
+          //     true) {}
           //Now I have to update the necessary things based on slot chosen, doctor uid, patient Uid, consultation fee, time of booking, and then create an appointment and get the appointment id and add it into a field in patients record, and add to the appointmnets collection -> doctor uid -> date -> time slot -> appointment Id.
           //seperately appointment id -> docUid, PatientUid, consultation Fee, Time choosen, session time, feedback, doctor Diagnosis, prescription.
         });
@@ -337,6 +358,7 @@ class _BookAppointmentState extends State<BookAppointment> {
       day = "Friday";
     else if (day == 'Sat') day = "Saturday";
     print(day);
+    // freeError = true;
     var scheduleForDay = widget.schedule["${day}"];
     return Scaffold(
       appBar: AppBar(
@@ -344,34 +366,41 @@ class _BookAppointmentState extends State<BookAppointment> {
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Theme.of(context).colorScheme.secondaryContainer,
       ),
-      body: Padding(
-          padding: EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                  "${widget.date!.split(" ")[2]}" +
-                      " ,${widget.date!.split(" ")[0]} ${widget.date!.split(" ")[1]}" +
-                      " ,${widget.date!.split(" ")[3]}",
-                  style: TextStyle(
-                    fontSize: 28,
-                  )),
-              SizedBox(height: 25),
-              Text("Doctor: Dr. " + "${widget.doctorDetails[0]}",
-                  style: TextStyle(fontSize: 20)),
-              Text("Consultation Fee: " + "${widget.doctorDetails[5]}",
-                  style: TextStyle(fontSize: 20)),
-              Text("Category : " + "${widget.doctorDetails[3]}",
-                  style: TextStyle(fontSize: 20)),
-              SizedBox(height: 25),
-              Text("Choose your time slot", style: TextStyle(fontSize: 25)),
-              // Text("${scheduleForDay}"),
-              Text("${widget.doctorDetails[8]}"),
-              _bookSlotWidget(scheduleForDay, widget.doctorDetails[8]),
-              _bookAppointmentButton(),
-            ],
-          )),
+      body: isLoading
+          ? CircularProgressIndicator()
+          : Padding(
+              padding: EdgeInsets.all(8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      "${widget.date!.split(" ")[2]}" +
+                          " ,${widget.date!.split(" ")[0]} ${widget.date!.split(" ")[1]}" +
+                          " ,${widget.date!.split(" ")[3]}",
+                      style: TextStyle(
+                        fontSize: 28,
+                      )),
+                  SizedBox(height: 25),
+                  Text("Doctor: Dr. " + "${widget.doctorDetails[0]}",
+                      style: TextStyle(fontSize: 20)),
+                  Text("Consultation Fee: " + "${widget.doctorDetails[5]}",
+                      style: TextStyle(fontSize: 20)),
+                  Text("Category : " + "${widget.doctorDetails[3]}",
+                      style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 25),
+                  Text("Choose your time slot", style: TextStyle(fontSize: 25)),
+                  // Text("${scheduleForDay}"),
+                  // Text("${widget.doctorDetails[8]}"),
+                  _bookSlotWidget(scheduleForDay, widget.doctorDetails[8]),
+                  freeError
+                      ? SizedBox(
+                          height: 1,
+                        )
+                      : Text("You have another appointment at this time"),
+                  _bookAppointmentButton(),
+                ],
+              )),
     );
   }
 }

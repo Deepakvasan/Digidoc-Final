@@ -3,5 +3,9 @@
     "@babel/cli": "^7.21.0",
     "@babel/core": "^7.21.3",
     "@babel/preset-env": "^7.20.2"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.6.0",
+    "firebase-functions": "^4.3.0"
   }
 }

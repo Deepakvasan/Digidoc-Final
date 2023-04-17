@@ -82,6 +82,11 @@ class _DoctorPageState extends State<DoctorPage> {
                         ),
                       ),
                       onTap: () {
+                        print(dates[index]);
+                        print(docDetails);
+                        print(widget.DoctorUid);
+                        print(_auth.getCurrentUserUid());
+                        print(schedule);
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -174,6 +179,8 @@ class _DoctorPageState extends State<DoctorPage> {
               appBar: AppBar(
                 title: Text("Book Appointment"),
                 backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor:
+                    Theme.of(context).colorScheme.secondaryContainer,
               ),
               body: Padding(
                 padding: const EdgeInsets.all(16.0),

@@ -63,8 +63,9 @@ class _PatientHomeState extends State<PatientHome> {
   List<DoctorDetails> doctorDetailsList = [];
   List<AppointmentDetails> appointmentDetailsList = [];
   Future<void> _retrieveAppointmentDetails() async {
-    var appointmentsCollection =
-        FirebaseFirestore.instance.collection("appointments");
+    var appointmentsCollection = FirebaseFirestore.instance
+        .collection("appointments")
+        .where("status", isEqualTo: "Booked");
     var appointmentQuerySnapshot = await appointmentsCollection.get();
     dynamic slotBooked = {};
     dynamic doctorUid = "";
@@ -122,12 +123,20 @@ class _PatientHomeState extends State<PatientHome> {
     dynamic timings =
         ""; // do like get todays day and show his timings and only list if available in this time, if not available dont add in the list.
     dynamic uid = "";
+    doctorDetailsList = [];
+
     for (final clinic in clinicsQuerySnapshot.docs) {
+      // print(clinic.id);
       doctorsCollection = clinic.reference.collection("doctors");
       final snapshot = await doctorsCollection.get();
       if (snapshot.docs.isNotEmpty) {
         // timings = snapshot.docs['timings'];
         print(timings);
+        print(snapshot.docs.length);
+        print("Entered Clinic");
+        print(clinic.id);
+        print(snapshot.docs[0].id);
+        print(snapshot.docs[1].id);
         final doctorDetails = snapshot.docs
             .map((doc) => DoctorDetails(
                   documentId: doc.id,
@@ -473,6 +482,7 @@ class _PatientHomeState extends State<PatientHome> {
                               ConnectionState.waiting) {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
+                            print(snapshot.error);
                             return const Text('Error');
                           } else {
                             print(doctorDetailsList.length);
