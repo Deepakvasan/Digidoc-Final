@@ -200,8 +200,7 @@ class _PatientHomeState extends State<PatientHome> {
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
       setState(() {
-        useraddress =
-            '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+        useraddress = place.postalCode;
       });
     }).catchError((e) {
       print(e);
@@ -210,7 +209,7 @@ class _PatientHomeState extends State<PatientHome> {
 
   Future<void> _getCurrentPosition() async {
     final hasPermission = await _handleLocationPermission();
-    if (!hasPermission) return;
+    if (!hasPermission) return null;
     await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) {
       setState(() {
@@ -218,6 +217,7 @@ class _PatientHomeState extends State<PatientHome> {
         lat = position.latitude;
         long = position.longitude;
       });
+      print("getting user position!!!");
       _getAddressFromLatLng(userposition!);
     }).catchError((e) {
       print(e);
@@ -260,7 +260,7 @@ class _PatientHomeState extends State<PatientHome> {
     // _auth.signOut();
     // Navigator.of(context).pushReplacement(new MaterialPageRoute(
     //     builder: (BuildContext context) => LoginScreen()));
-
+    print("Address $useraddress");
     return FutureBuilder(
         future: usersCollectionReference.doc(uid).get(),
         builder: (context, snapshot) {
@@ -294,14 +294,9 @@ class _PatientHomeState extends State<PatientHome> {
                                   padding: const EdgeInsets.all(4.0),
                                   child: Column(
                                     children: [
-                                      Text(
-                                        "Guindy,",
-                                        style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text("Chennai")
+                                      useraddress != null
+                                          ? Text(useraddress!)
+                                          : Text("Wait..")
                                     ],
                                   ),
                                 )

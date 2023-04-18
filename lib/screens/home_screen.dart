@@ -4,6 +4,7 @@ import 'package:signup_login/screens/doctor_profile.dart';
 import 'package:signup_login/screens/doctor_page.dart';
 import 'package:signup_login/screens/faq_page.dart';
 import 'package:signup_login/screens/patient_home.dart';
+import 'package:signup_login/screens/reports.dart';
 import 'package:signup_login/services/auth.dart';
 
 class Home extends StatefulWidget {
@@ -23,7 +24,7 @@ class _HomeState extends State<Home> {
     Center(
       child: DoctorProfile(),
     ),
-    Center(child: Text('Reports', style: TextStyle(fontSize: 60))),
+    Center(child: Reports()),
     Center(child: Text('Profile', style: TextStyle(fontSize: 60))),
   ];
   @override
