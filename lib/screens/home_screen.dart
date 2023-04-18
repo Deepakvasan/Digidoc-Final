@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:signup_login/screens/clinic_page.dart';
+import 'package:signup_login/screens/appointments_list.dart';
+import 'package:signup_login/screens/clinic_page_test.dart';
 import 'package:signup_login/screens/doctor_profile.dart';
 import 'package:signup_login/screens/doctor_page.dart';
 import 'package:signup_login/screens/faq_page.dart';
@@ -21,7 +22,7 @@ class _HomeState extends State<Home> {
       child: PatientHome(),
     ),
     Center(
-      child: DoctorProfile(),
+      child: AppointmentList(),
     ),
     Center(child: Text('Reports', style: TextStyle(fontSize: 60))),
     Center(child: Text('Profile', style: TextStyle(fontSize: 60))),

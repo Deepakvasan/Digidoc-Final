@@ -115,6 +115,8 @@ class _AddDoctorState extends State<AddDoctor> {
                         minWidth: MediaQuery.of(context).size.width - 300,
                         onPressed: () {
                           if (snapshot.data!.docs.length > 0) {
+                            String? uid = _auth.getCurrentUserUid();
+                            _database.makeInitialisedTrue(uid);
                             Navigator.of(context).pushReplacement(
                                 new MaterialPageRoute(
                                     builder: (BuildContext context) =>

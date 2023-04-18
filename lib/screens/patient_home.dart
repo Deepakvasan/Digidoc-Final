@@ -1,6 +1,8 @@
 import 'package:flutter/scheduler.dart';
+import 'package:signup_login/screens/appointmentPage.dart';
 import 'package:signup_login/screens/appointment_patient.dart';
 import 'package:signup_login/screens/clinicCard.dart';
+import 'package:signup_login/screens/clinic_page.dart';
 import 'package:signup_login/screens/docCard.dart';
 import 'package:signup_login/screens/appointmentCard.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,7 +27,18 @@ class DoctorDetails {
       required this.qualification});
 }
 
+class ClinicDetails {
+  String clinicId;
+  String clinicName;
+
+  ClinicDetails({
+    required this.clinicId,
+    required this.clinicName,
+  });
+}
+
 class AppointmentDetails {
+  dynamic appointmentId;
   dynamic slotBooked;
   dynamic doctorUid;
   dynamic sessionTime;
@@ -33,8 +46,10 @@ class AppointmentDetails {
   dynamic timeOfBooking;
   dynamic bookingStatus;
   dynamic date;
+  dynamic code;
 
   AppointmentDetails({
+    required this.appointmentId,
     required this.slotBooked,
     required this.doctorUid,
     required this.sessionTime,
@@ -42,7 +57,42 @@ class AppointmentDetails {
     required this.bookingStatus,
     required this.timeOfBooking,
     required this.date,
+    required this.code,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is AppointmentDetails &&
+      other.slotBooked == slotBooked &&
+      other.consultationFee == consultationFee &&
+      other.sessionTime == sessionTime &&
+      other.bookingStatus == bookingStatus &&
+      other.timeOfBooking == timeOfBooking &&
+      other.doctorUid == doctorUid &&
+      other.date == date &&
+      other.code == code;
+
+  @override
+  int get hashCode =>
+      slotBooked.hashCode ^
+      consultationFee.hashCode ^
+      sessionTime.hashCode ^
+      bookingStatus.hashCode ^
+      timeOfBooking.hashCode ^
+      doctorUid.hashCode ^
+      date.hashCode ^
+      code.hashCode;
+
+  void printer() {
+    print(this.slotBooked);
+    print(this.consultationFee);
+    print(this.sessionTime);
+    print(this.bookingStatus);
+    print(this.timeOfBooking);
+    print(this.doctorUid);
+    print(this.date);
+    print(code);
+  }
 }
 
 class PatientHome extends StatefulWidget {
@@ -56,55 +106,59 @@ class _PatientHomeState extends State<PatientHome> {
   late Future<void> _future;
 
   late DatabaseService _database;
-
+  List<ClinicDetails> clinicList = [];
   AuthService _auth = AuthService();
   String? uid;
   dynamic patientName = null;
   List<DoctorDetails> doctorDetailsList = [];
   List<AppointmentDetails> appointmentDetailsList = [];
   Future<void> _retrieveAppointmentDetails() async {
-    var appointmentsCollection = FirebaseFirestore.instance
-        .collection("appointments")
-        .where("status", isEqualTo: "Booked");
-    var appointmentQuerySnapshot = await appointmentsCollection.get();
-    dynamic slotBooked = {};
-    dynamic doctorUid = "";
-    dynamic consultationFee = "";
-    dynamic sessionTime = "";
-    dynamic timeOfBooking;
-    dynamic bookingStatus;
+    _database = DatabaseService();
+    uid = _auth.getCurrentUserUid();
+    var listOfAppointments = await _database.getAllPatientAppointments(uid);
+    var appointmentsCollection =
+        FirebaseFirestore.instance.collection("appointments");
+
     var appointmentDetails;
     appointmentDetailsList = [];
-    if (appointmentQuerySnapshot.docs.isNotEmpty) {
-      // print(appointmentQuerySnapshot.docs.elementAt(0)["doctorUid"]);
-      print("HERE HERE");
-      // Iterate over the list of documents and get the document ID for each one
-      // var docId = docSnapshot.id;
-      // if (docId != "doctor") {
-      appointmentDetails = appointmentQuerySnapshot.docs
-          .where((doc) => doc.id != "doctors")
-          .map((doc) => AppointmentDetails(
-                slotBooked: doc['slotChosen'],
-                consultationFee: doc['consultationFee'],
-                sessionTime: doc['sessionTime'],
-                bookingStatus: doc['status'],
-                timeOfBooking: doc['timeOfBooking'],
-                doctorUid: doc['doctorUid'],
-                date: doc['date'],
-              ))
-          .toList();
+    if (listOfAppointments != null) {
+      print(listOfAppointments);
+      print(listOfAppointments.length);
+      for (int i = 0; i < listOfAppointments.length; i++) {
+        var appointments = listOfAppointments[i];
+        var docRef = appointmentsCollection.doc(appointments);
+        var data = await docRef.get();
+        if (data.exists) {
+          var appointmentData = data.data()!;
+          var appointmentDetails = AppointmentDetails(
+            appointmentId: appointments,
+            slotBooked: appointmentData['slotChosen'],
+            consultationFee: appointmentData['consultationFee'],
+            sessionTime: appointmentData['sessionTime'],
+            bookingStatus: appointmentData['status'],
+            timeOfBooking: appointmentData['timeOfBooking'],
+            doctorUid: appointmentData['doctorUid'],
+            date: appointmentData['date'],
+            code: appointmentData['code'],
+          );
+          // appointmentDetails.printer();
+          // print("RESUTL");
+          // print(appointmentDetailsList.contains(appointmentDetails));
+          // if (!appointmentDetailsList.contains(appointmentDetails)) {
+          //   appointmentDetailsList.add(appointmentDetails);
+          // }
+          print(appointmentDetails.bookingStatus);
+          if (appointmentDetails.bookingStatus == "Booked") {
+            appointmentDetailsList.add(appointmentDetails);
+          }
 
-      print(appointmentDetails);
-      print(appointmentDetails);
-      appointmentDetailsList
-          .addAll(appointmentDetails.cast<AppointmentDetails>());
-
-      print("Appointment List");
-      print(appointmentDetailsList);
-    } else {
-      print('No documents found in the appointments collection.');
+          print(appointmentDetailsList);
+          // Do something with the appointmentDetails object, such as adding it to a list
+        } else {
+          print('No documents found in the appointments collection.');
+        }
+      }
     }
-
     // do like get todays day and show his timings and only list if available in this time, if not available dont add in the list.
   }
 
@@ -148,6 +202,32 @@ class _PatientHomeState extends State<PatientHome> {
         doctorDetailsList.addAll(doctorDetails.cast<DoctorDetails>());
       }
     }
+  }
+
+  Future<void> _retrieveClinicDetails() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .where('userType', isEqualTo: 'clinic')
+        .where('initialised', isEqualTo: 'true')
+        .get()
+        .then((querySnapshot) {
+      clinicList = [];
+      querySnapshot.docs.forEach((doc) {
+        // Map each document data to the ClinicDetails class
+        print("CLINICS VISITED");
+        print(doc.id);
+        ClinicDetails clinic = ClinicDetails(
+          clinicId: doc.id,
+          clinicName: doc.data()['name'],
+        );
+
+        // Add the clinic object to the list
+        clinicList.add(clinic);
+      });
+
+      // Use the clinicList as needed
+      print(clinicList);
+    });
   }
 
   Future<dynamic> getPatientName() {
@@ -549,24 +629,44 @@ class _PatientHomeState extends State<PatientHome> {
                       SizedBox(
                         height: 15.0,
                       ),
-                      Container(
-                        height: 140.0,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            ClinicCard(
-                              name: "ABC Clinic",
-                              rating: "4.3",
-                            ),
-                            ClinicCard(
-                              name: "PQR Clinic",
-                              rating: "4.1",
-                            ),
-                            ClinicCard(name: "Apollo 24x7", rating: "4.5")
-                          ],
-                        ),
+                      FutureBuilder<void>(
+                        future: _retrieveClinicDetails(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            print(snapshot.error);
+                            return const Text('Error');
+                          } else {
+                            print(clinicList.length);
+                            return Container(
+                              height: 140.0,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: clinicList.length,
+                                itemBuilder: (context, index) {
+                                  final clinicDetails = clinicList[index];
+                                  return InkWell(
+                                    child: ClinicCard(
+                                      name: clinicDetails.clinicName,
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ClinicPage(
+                                                  clinicDetails: clinicDetails,
+                                                )),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        },
                       ),
-
                       //Appointment List View
                       SizedBox(height: 30.0),
                       Container(
@@ -597,7 +697,7 @@ class _PatientHomeState extends State<PatientHome> {
                         height: 15,
                       ),
                       FutureBuilder<void>(
-                        future: _retrieveAppointmentDetails(),
+                        future: _future,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -609,38 +709,53 @@ class _PatientHomeState extends State<PatientHome> {
                             print(appointmentDetailsList.length);
                             print(appointmentDetailsList);
                             return Container(
-                              height: 140.0,
-                              child: ListView.builder(
-                                // physics: NeverScrollableScrollPhysics(),
-                                // scrollDirection: Axis.vertical,
-                                itemCount: appointmentDetailsList.length,
-                                itemBuilder: (context, index) {
-                                  print("INDEX");
-                                  print(index);
-                                  final appointmentDetails =
-                                      appointmentDetailsList[index];
-                                  return InkWell(
-                                    child: AppointmentCard(
-                                      doctorName: appointmentDetails.doctorUid,
-                                      slotTime: appointmentDetails.slotBooked,
-                                      sessionTime:
-                                          appointmentDetails.sessionTime,
-                                      consultationFee:
-                                          appointmentDetails.consultationFee,
-                                      date: appointmentDetails.date,
-                                    ),
-                                    onTap: () {
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //       builder: (context) => DoctorPage(
-                                      //             DoctorUid:
-                                      //                 doctorDetails.documentId,
-                                      //           )),
-                                      // );
-                                    },
-                                  );
-                                },
+                              height: 600.0,
+                              child: Expanded(
+                                child: appointmentDetailsList.length > 0
+                                    ? ListView.builder(
+                                        // physics: NeverScrollableScrollPhysics(),
+                                        // scrollDirection: Axis.vertical,
+                                        itemCount:
+                                            appointmentDetailsList.length,
+                                        itemBuilder: (context, index) {
+                                          print(appointmentDetailsList.length);
+                                          print("INDEX");
+                                          print(index);
+                                          final appointmentDetails =
+                                              appointmentDetailsList[index];
+                                          return InkWell(
+                                            child: AppointmentCard(
+                                              doctorName:
+                                                  appointmentDetails.doctorUid,
+                                              slotTime:
+                                                  appointmentDetails.slotBooked,
+                                              sessionTime: appointmentDetails
+                                                  .sessionTime,
+                                              consultationFee:
+                                                  appointmentDetails
+                                                      .consultationFee,
+                                              date: appointmentDetails.date,
+                                            ),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AppointmentPage(
+                                                          appointmentDetails:
+                                                              appointmentDetails,
+                                                        )),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      )
+                                    : Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text("No Active Appointments"),
+                                        ),
+                                      ),
                               ),
                             );
                           }
