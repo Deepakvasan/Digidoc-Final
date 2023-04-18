@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ClinicCard extends StatelessWidget {
-  final String name, rating;
+  final String? name;
 
   ClinicCard({
     required this.name,
-    required this.rating,
   });
 
   @override
@@ -44,24 +43,24 @@ class ClinicCard extends StatelessWidget {
                 SizedBox(
                   height: 10.0,
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 3.0),
-                  width: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Color(0xff7569b6),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Text("$rating"),
-                      Icon(
-                        Icons.star,
-                        size: 12.0,
-                      )
-                    ],
-                  ),
-                )
+                // Container(
+                //   padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 3.0),
+                //   width: 40,
+                //   alignment: Alignment.center,
+                //   decoration: BoxDecoration(
+                //     color: Color(0xff7569b6),
+                //     borderRadius: BorderRadius.circular(10),
+                //   ),
+                //   child: Row(
+                //     children: [
+                //       Text("$rating"),
+                //       Icon(
+                //         Icons.star,
+                //         size: 12.0,
+                //       )
+                //     ],
+                //   ),
+                // )
               ],
             )
           ],

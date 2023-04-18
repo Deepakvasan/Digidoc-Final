@@ -30,8 +30,8 @@ class AppointmentCard extends StatelessWidget {
             }
 
             var details = snapshot.data;
-            print("OBTAINING FROM Dtabase Service");
-            print(details);
+            // print("OBTAINING FROM Dtabase Service");
+            // print(details);
             var name = details![0];
             return Text("$name");
           } else {

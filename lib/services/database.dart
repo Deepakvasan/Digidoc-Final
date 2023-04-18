@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:signup_login/services/auth.dart';
+import 'dart:math';
 
 class DatabaseService {
   final CollectionReference userCollection =
@@ -123,6 +124,22 @@ class DatabaseService {
     return complete;
   }
 
+  Future getListOfDoctors(String id) async {
+    List<String> docIds = [];
+    var doctorsSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(id)
+        .collection("doctors")
+        .get();
+
+    doctorsSnapshot.docs.forEach((doc) {
+      docIds.add(doc.id);
+    });
+
+    print(docIds);
+    return docIds;
+  }
+
   Future updatePatientUserData(
       String name,
       String phone,
@@ -153,6 +170,7 @@ class DatabaseService {
     DocumentSnapshot<Map<String, dynamic>> docSnapshot;
     var documentRef;
     var doctorsCollection;
+    var clinicData;
     dynamic name = "";
     dynamic phone = "";
     dynamic category = "";
@@ -162,10 +180,14 @@ class DatabaseService {
     dynamic timings = {};
     dynamic qualification = "";
     dynamic consultationTime = "";
+    dynamic clinicName = "";
+    dynamic clinicAddressLine1 = "";
+    dynamic clinicAddressLine2 = "";
     late Map<String, dynamic> data;
     for (final clinic in clinicsQuerySnapshot.docs) {
       doctorsCollection = clinic.reference.collection("doctors");
       documentRef = doctorsCollection.doc(uid);
+      clinicData = clinic.data();
       docSnapshot = await documentRef.get();
       if (docSnapshot.exists) {
         data = docSnapshot.data() as Map<String, dynamic>;
@@ -178,6 +200,9 @@ class DatabaseService {
         category = data['category'];
         timings = data['timings'];
         qualification = data['qualification'];
+        clinicName = clinicData['name'];
+        clinicAddressLine1 = clinicData['addressLine1'];
+        clinicAddressLine2 = clinicData['addressLine2'];
         break;
       }
     }
@@ -191,10 +216,26 @@ class DatabaseService {
       timings,
       qualification,
       consultationTime,
+      clinicName,
+      clinicAddressLine1,
+      clinicAddressLine2
     ];
-    print("DETAILS ");
-    print(details);
+    // print("DETAILS ");
+    // print(details);
     return details;
+  }
+
+  Future getAllPatientAppointments(String? uid) async {
+    final docRef = FirebaseFirestore.instance.collection("users").doc(uid);
+    var data = await docRef.get();
+    print("data");
+
+    if (data.exists && data.data()!.containsKey("appointmentId")) {
+      var listOfAppointments = data.data()!["appointmentId"];
+      return listOfAppointments;
+    } else {
+      return null;
+    }
   }
 
   Future isPatientFree(var slotchosed, var date, var sessionTime) async {
@@ -275,6 +316,7 @@ class DatabaseService {
     String? doctorUid,
     String? patientUid,
     String? consultationFee,
+    String? secretCode,
     Map<String, int>? slotChosen,
     Map<dynamic, String>? slotsDetails,
     String? date,
@@ -283,6 +325,10 @@ class DatabaseService {
     var appointmentsCollection =
         FirebaseFirestore.instance.collection("appointments");
     final DocumentReference appointmentDocRef = appointmentsCollection.doc();
+    Random random = new Random();
+    int randomNumber = random.nextInt(9000) +
+        1000; // generates a random number between 1000 and 9999
+    secretCode = randomNumber.toString();
     await appointmentDocRef.set({
       'doctorUid': doctorUid,
       'patientUid': patientUid,
@@ -292,6 +338,7 @@ class DatabaseService {
       'sessionTime': sessionTime,
       'date': date,
       'status': 'Booked',
+      'code': secretCode,
     });
 
     String appointmentId = appointmentDocRef.id;
@@ -402,5 +449,20 @@ class DatabaseService {
       'complete': true,
       'consultationTime': consultationTime,
     });
+  }
+
+  Future cancelAppointment(String appointmentId) async {
+    final appointmentsRef = FirebaseFirestore.instance
+        .collection("appointments")
+        .doc(appointmentId);
+
+    await appointmentsRef.update({"status": "cancelled"});
+  }
+
+  Future makeInitialisedTrue(String? uid) async {
+    final clinicsCollectionRef =
+        FirebaseFirestore.instance.collection("users").doc(uid);
+    print("CHANGING INITIALISED");
+    await clinicsCollectionRef.update({"initialised": "true"});
   }
 }
