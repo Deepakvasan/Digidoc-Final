@@ -130,7 +130,16 @@ class _AppointmentListState extends State<AppointmentList> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text("Active Appointments"),
+            Container(
+              child: Text(
+                "Active Appointments",
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              margin: EdgeInsets.all(12.0),
+            ),
             FutureBuilder<void>(
               future: _retrieveAppointmentDetails(),
               builder: (context, snapshot) {
@@ -169,10 +178,11 @@ class _AppointmentListState extends State<AppointmentList> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => AppointmentPage(
-                                                appointmentDetails:
-                                                    appointmentDetails,
-                                              )),
+                                        builder: (context) => AppointmentPage(
+                                          appointmentDetails:
+                                              appointmentDetails,
+                                        ),
+                                      ),
                                     );
                                   },
                                 );
@@ -192,7 +202,16 @@ class _AppointmentListState extends State<AppointmentList> {
             SizedBox(
               height: 20,
             ),
-            Text("Other Appointments"),
+            Container(
+              child: Text(
+                "Other Appointments",
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              margin: EdgeInsets.all(12.0),
+            ),
             FutureBuilder<void>(
               future: _retrieveOtherAppointmentDetails(),
               builder: (context, snapshot) {

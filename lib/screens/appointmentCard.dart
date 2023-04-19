@@ -33,9 +33,17 @@ class AppointmentCard extends StatelessWidget {
             // print("OBTAINING FROM Dtabase Service");
             // print(details);
             var name = details![0];
-            return Text("$name");
+            return Text(
+              "$name",
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            );
           } else {
-            return const CircularProgressIndicator();
+            return const LinearProgressIndicator(
+              color: Color(0xff38e7e7),
+            );
           }
         });
   }

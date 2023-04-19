@@ -247,7 +247,7 @@ class _DoctorPageState extends State<DoctorPage> {
                 appBar: AppBar(
                   actions: [],
                 ),
-                body: CircularProgressIndicator());
+                body: Center(child: CircularProgressIndicator()));
           }
         });
   }

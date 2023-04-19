@@ -40,31 +40,61 @@ class _AppointmentPageState extends State<AppointmentPage> {
             var clinicAddressLine1 = details![10];
             var clinicAddressLine2 = details![11];
 
-            return Column(children: [
-              Text("You'r Appointment in $clinicName"),
-              SizedBox(
-                height: 10,
-              ),
-              Text("Doctor: $name"),
-              SizedBox(
-                height: 10,
-              ),
-              Text("$qualification"),
-              SizedBox(
-                height: 10,
-              ),
-              Text("$category"),
-              SizedBox(
-                height: 20,
-              ),
-              Text("Address to Clinic"),
-              SizedBox(
-                height: 10,
-              ),
-              Text("$clinicAddressLine1, $clinicAddressLine2"),
-            ]);
+            return Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(10.0),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Your Appointment in $clinicName",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text("Doctor: $name"),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text("$qualification"),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text("$category"),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Address to Clinic",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text("$clinicAddressLine1, $clinicAddressLine2"),
+                  ]),
+            );
           } else {
-            return const CircularProgressIndicator();
+            return Row(
+              children: [
+                Text(
+                  "Getting Clinic details",
+                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 15.0,
+                ),
+                CircularProgressIndicator(),
+              ],
+            );
           }
         });
   }
@@ -123,42 +153,68 @@ class _AppointmentPageState extends State<AppointmentPage> {
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                _getDoctorName(appointmentDetails.doctorUid),
-                SizedBox(height: 20),
-                Text("Appointment On ${appointmentDetails.date}"),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Time: ${appointmentDetails.slotBooked['hour']}:${appointmentDetails.slotBooked['minute']}",
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text("Appointment duration: ${appointmentDetails.sessionTime}"),
-                SizedBox(height: 20),
-                Text("Status: ${appointmentDetails.bookingStatus}"),
-                SizedBox(height: 20),
-                appointmentDetails.bookingStatus == "Booked"
-                    ? Column(
-                        children: <Widget>[
-                          Text("Share this code on visiting the doctor"),
-                          SizedBox(
-                            height: 12,
-                          ),
-                          Text("${appointmentDetails.code}"),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          cancelButton,
-                        ],
-                      )
-                    : SizedBox(
-                        height: 10,
-                      ),
-              ],
+            child: Container(
+              margin: EdgeInsets.all(30.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _getDoctorName(appointmentDetails.doctorUid),
+                  SizedBox(height: 20),
+                  Text(
+                    "Appointment Details: ",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Text("Appointment On ${appointmentDetails.date}"),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Time: ${appointmentDetails.slotBooked['hour']}:${appointmentDetails.slotBooked['minute']}",
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                      "Appointment duration: ${appointmentDetails.sessionTime}"),
+                  SizedBox(height: 20),
+                  Text("Status: ${appointmentDetails.bookingStatus}"),
+                  SizedBox(height: 20),
+                  appointmentDetails.bookingStatus == "Booked"
+                      ? Column(
+                          children: <Widget>[
+                            Text(
+                              "Share this code on visiting the doctor",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Text(
+                              "${appointmentDetails.code}",
+                              style: TextStyle(
+                                fontSize: 24.0,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 30,
+                            ),
+                            cancelButton,
+                          ],
+                        )
+                      : SizedBox(
+                          height: 10,
+                        ),
+                ],
+              ),
             ),
           ),
         ),

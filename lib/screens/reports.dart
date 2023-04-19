@@ -98,9 +98,9 @@ class ReportListItem extends StatelessWidget {
             color: Theme.of(parentContext).primaryColor.withOpacity(0.95),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black,
+                  color: Colors.grey.shade800,
                   offset: const Offset(5.0, 5.0),
-                  blurRadius: 8.0)
+                  blurRadius: 4.0)
             ]),
         child: Row(
           children: [
@@ -109,7 +109,7 @@ class ReportListItem extends StatelessWidget {
               width: 30,
               child: Icon(
                 Icons.file_copy_rounded,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.secondary,
               ),
             ),
             SizedBox(
@@ -118,8 +118,8 @@ class ReportListItem extends StatelessWidget {
             Text(
               "$name",
               style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.white,
+                fontSize: 17.0,
+                color: Theme.of(context).colorScheme.secondaryContainer,
               ),
             ),
           ],

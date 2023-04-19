@@ -65,6 +65,7 @@ class _ReportViewState extends State<ReportView> {
       appBar: AppBar(
         title: Text(widget.reportType),
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Theme.of(context).colorScheme.secondaryContainer,
       ),
       body: GestureDetector(
         child: FutureBuilder(
@@ -96,9 +97,9 @@ class _ReportViewState extends State<ReportView> {
                                     .withOpacity(0.95),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black,
+                                      color: Colors.grey.shade800,
                                       offset: const Offset(3.0, 3.0),
-                                      blurRadius: 8.0)
+                                      blurRadius: 4.0)
                                 ]),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,7 +108,9 @@ class _ReportViewState extends State<ReportView> {
                                   children: [
                                     Icon(
                                       Icons.picture_as_pdf_rounded,
-                                      color: Colors.white,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
                                     ),
                                     SizedBox(
                                       width: 15.0,
@@ -115,7 +118,9 @@ class _ReportViewState extends State<ReportView> {
                                     Text(
                                       snapshot.data!.items[index].name,
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondaryContainer,
                                         fontSize: 18.0,
                                       ),
                                     ),
@@ -133,7 +138,9 @@ class _ReportViewState extends State<ReportView> {
                                       },
                                       child: Icon(
                                         CupertinoIcons.cloud_download_fill,
-                                        color: Colors.white,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
                                       ),
                                     ),
                                     SizedBox(
@@ -142,7 +149,9 @@ class _ReportViewState extends State<ReportView> {
                                     GestureDetector(
                                       child: Icon(
                                         Icons.delete,
-                                        color: Colors.white,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
                                       ),
                                       onTap: () {
                                         _deleteConfirmation(

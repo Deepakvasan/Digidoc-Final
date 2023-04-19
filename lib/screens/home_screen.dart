@@ -4,6 +4,7 @@ import 'package:signup_login/screens/clinic_page_test.dart';
 import 'package:signup_login/screens/doctor_profile.dart';
 import 'package:signup_login/screens/doctor_page.dart';
 import 'package:signup_login/screens/faq_page.dart';
+import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/screens/patient_home.dart';
 import 'package:signup_login/screens/reports.dart';
 import 'package:signup_login/services/auth.dart';
@@ -62,6 +63,8 @@ class _HomeState extends State<Home> {
           TextButton.icon(
               onPressed: () async {
                 await _auth.signOut();
+                Navigator.of(context).pushReplacement(new MaterialPageRoute(
+                    builder: (BuildContext context) => LoginScreen()));
               },
               icon: Icon(
                 Icons.person,

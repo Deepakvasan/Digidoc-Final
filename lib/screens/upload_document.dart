@@ -50,6 +50,7 @@ class _UploadDocumentState extends State<UploadDocument> {
           ),
         ),
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Theme.of(context).colorScheme.secondaryContainer,
       ),
       body: SafeArea(
         child: Container(
@@ -164,6 +165,7 @@ class _UploadDocumentState extends State<UploadDocument> {
                         child: Icon(
                           Icons.file_open,
                           size: 30.0,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ),
                       SizedBox(
@@ -203,6 +205,7 @@ class _UploadDocumentState extends State<UploadDocument> {
                         child: Icon(
                           Icons.camera_alt_rounded,
                           size: 30.0,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                         style: ElevatedButton.styleFrom(
                           fixedSize: Size(80, 80),
@@ -293,8 +296,14 @@ class _UploadDocumentState extends State<UploadDocument> {
                   icon: Icon(
                     Icons.upload,
                     size: 28.0,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
-                  label: Text("UPLOAD FILE"),
+                  label: Text(
+                    "UPLOAD FILE",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                    ),
+                  ),
                   style: ButtonStyle(
                     padding: MaterialStateProperty.all<EdgeInsets>(
                       EdgeInsets.all(20.0),

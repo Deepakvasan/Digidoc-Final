@@ -13,6 +13,7 @@ import 'package:signup_login/screens/doctor_page.dart';
 import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/services/auth.dart';
 import 'package:signup_login/services/database.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DoctorDetails {
   String documentId;
@@ -250,9 +251,9 @@ class _PatientHomeState extends State<PatientHome> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-    if (!serviceEnabled) {
+    while (!serviceEnabled) {
       Geolocator.openLocationSettings();
-      return Future.error("Location Services not enabled");
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
     }
 
     permission = await Geolocator.checkPermission();
@@ -280,7 +281,8 @@ class _PatientHomeState extends State<PatientHome> {
         .then((List<Placemark> placemarks) {
       Placemark place = placemarks[0];
       setState(() {
-        useraddress = place.postalCode;
+        useraddress =
+            place.subLocality == "" ? place.subLocality : place.postalCode;
       });
     }).catchError((e) {
       print(e);
@@ -362,8 +364,7 @@ class _PatientHomeState extends State<PatientHome> {
                             Text(
                               "Greetings ${name}!",
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontWeight: FontWeight.bold, fontSize: 20.0),
                             ),
                             Row(
                               children: [
@@ -476,7 +477,10 @@ class _PatientHomeState extends State<PatientHome> {
                               ),
                             ),
                             InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Uri emergencyPhone = Uri.parse("tel:108");
+                                launchUrl(emergencyPhone);
+                              },
                               child: Container(
                                 width: 150,
                                 decoration: BoxDecoration(
@@ -554,7 +558,12 @@ class _PatientHomeState extends State<PatientHome> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
+                            return Container(
+                              margin: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: LinearProgressIndicator(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            );
                           } else if (snapshot.hasError) {
                             print(snapshot.error);
                             return const Text('Error');

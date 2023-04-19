@@ -56,6 +56,7 @@ dependencies:
   firebase_storage: ^11.1.0
   flutter_file_downloader: ^1.1.2
   path_provider: ^2.0.14
+  url_launcher: ^6.1.10
 
 dependency_overrides:
   intl: ^0.18.0

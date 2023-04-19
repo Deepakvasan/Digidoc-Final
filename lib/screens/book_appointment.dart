@@ -284,7 +284,9 @@ class _BookAppointmentState extends State<BookAppointment> {
                       ))
                 ],
               ),
-              body: CircularProgressIndicator(),
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           }
         });
@@ -305,40 +307,51 @@ class _BookAppointmentState extends State<BookAppointment> {
         "," +
         widget.date!.split(" ")[3];
     print("Date <- this will be a document id" + date);
-    return ElevatedButton(
-        child: Text("Book Appointment"),
-        onPressed: () async {
-          setState(() {
-            isLoading = true;
-            freeError = false;
-          });
+    return Center(
+      child: ElevatedButton(
+          child: Text(
+            "Book Appointment",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+            ),
+          ),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(
+                Theme.of(context).primaryColor),
+          ),
+          onPressed: () async {
+            setState(() {
+              isLoading = true;
+              freeError = false;
+            });
 
-          bool isFree =
-              await patientFree(SlotChosed, date, widget.doctorDetails[8]);
+            bool isFree =
+                await patientFree(SlotChosed, date, widget.doctorDetails[8]);
 
-          if (isFree) {
-            print("BOOKING THE APPOINTMENT");
-            await _database.createAppointment(
-              doctorUid: widget.doctorUid,
-              patientUid: widget.patientUid,
-              consultationFee: widget.doctorDetails[5],
-              slotChosen: SlotChosed,
-              slotsDetails: slotChosen,
-              date: date,
-              sessionTime: widget.doctorDetails[8],
-            );
-          } else {
-            print("no free time");
-          }
-          setState(() {
-            isLoading = false;
-            freeError = isFree;
-          });
-          // if (await patientFree(SlotChosed, date, widget.doctorDetails[8]) ==
-          //     true) {}
-          //Now I have to update the necessary things based on slot chosen, doctor uid, patient Uid, consultation fee, time of booking, and then create an appointment and get the appointment id and add it into a field in patients record, and add to the appointmnets collection -> doctor uid -> date -> time slot -> appointment Id.
-          //seperately appointment id -> docUid, PatientUid, consultation Fee, Time choosen, session time, feedback, doctor Diagnosis, prescription.
-        });
+            if (isFree) {
+              print("BOOKING THE APPOINTMENT");
+              await _database.createAppointment(
+                doctorUid: widget.doctorUid,
+                patientUid: widget.patientUid,
+                consultationFee: widget.doctorDetails[5],
+                slotChosen: SlotChosed,
+                slotsDetails: slotChosen,
+                date: date,
+                sessionTime: widget.doctorDetails[8],
+              );
+            } else {
+              print("no free time");
+            }
+            setState(() {
+              isLoading = false;
+              freeError = isFree;
+            });
+            // if (await patientFree(SlotChosed, date, widget.doctorDetails[8]) ==
+            //     true) {}
+            //Now I have to update the necessary things based on slot chosen, doctor uid, patient Uid, consultation fee, time of booking, and then create an appointment and get the appointment id and add it into a field in patients record, and add to the appointmnets collection -> doctor uid -> date -> time slot -> appointment Id.
+            //seperately appointment id -> docUid, PatientUid, consultation Fee, Time choosen, session time, feedback, doctor Diagnosis, prescription.
+          }),
+    );
   }
 
   @override
@@ -374,13 +387,18 @@ class _BookAppointmentState extends State<BookAppointment> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    height: 10,
+                  ),
                   Text(
-                      "${widget.date!.split(" ")[2]}" +
-                          " ,${widget.date!.split(" ")[0]} ${widget.date!.split(" ")[1]}" +
-                          " ,${widget.date!.split(" ")[3]}",
-                      style: TextStyle(
-                        fontSize: 28,
-                      )),
+                    "${widget.date!.split(" ")[2]}" +
+                        ", ${widget.date!.split(" ")[0]} ${widget.date!.split(" ")[1]}" +
+                        ", ${widget.date!.split(" ")[3]}",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   SizedBox(height: 25),
                   Text("Doctor: Dr. " + "${widget.doctorDetails[0]}",
                       style: TextStyle(fontSize: 20)),
@@ -389,7 +407,16 @@ class _BookAppointmentState extends State<BookAppointment> {
                   Text("Category : " + "${widget.doctorDetails[3]}",
                       style: TextStyle(fontSize: 20)),
                   SizedBox(height: 25),
-                  Text("Choose your time slot", style: TextStyle(fontSize: 25)),
+                  Text(
+                    "Choose your time slot :",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   // Text("${scheduleForDay}"),
                   // Text("${widget.doctorDetails[8]}"),
                   _bookSlotWidget(scheduleForDay, widget.doctorDetails[8]),
@@ -400,7 +427,8 @@ class _BookAppointmentState extends State<BookAppointment> {
                       : Text("You have another appointment at this time"),
                   _bookAppointmentButton(),
                 ],
-              )),
+              ),
+            ),
     );
   }
 }
