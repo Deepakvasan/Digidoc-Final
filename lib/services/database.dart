@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:signup_login/screens/patient_home.dart';
 import 'package:signup_login/services/auth.dart';
 import 'dart:math';
 
@@ -9,7 +10,7 @@ class DatabaseService {
 
   final String? uid;
   DatabaseService({this.uid});
-
+  AuthService _auth = AuthService();
   Future updateClinicUserData(
     String clinicName,
     String clinicEmail,
@@ -26,7 +27,41 @@ class DatabaseService {
     });
   }
 
-  AuthService _auth = AuthService();
+  Future updateDiagnosis(String? appointmentId, String diagnosis) async {
+    var appointmentCollection =
+        FirebaseFirestore.instance.collection("appointments");
+    final DocumentReference appointmentDocRef =
+        appointmentCollection.doc(appointmentId);
+    print(appointmentId);
+    await appointmentDocRef.update({
+      'diagnosis': diagnosis,
+      'status': "Completed",
+    });
+    print("Diagnosis Done");
+  }
+
+  Future getDiagnosis(String? appointmentId) async {
+    final appointmentsRef = FirebaseFirestore.instance
+        .collection("appointments")
+        .doc(appointmentId);
+
+    var data = await appointmentsRef.get();
+    var diagnosis = data.data()!["diagnosis"];
+    return diagnosis;
+  }
+
+  Future updateAppointmentStatus(String? appointmentId, String status) async {
+    var appointmentCollection =
+        FirebaseFirestore.instance.collection("appointments");
+    final DocumentReference appointmentDocRef =
+        appointmentCollection.doc(appointmentId);
+    print(appointmentId);
+    await appointmentDocRef.update({
+      'status': status,
+    });
+    print("STATUS UPDATED TO $status");
+  }
+
   Future getPatientName(String? uid) async {
     DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
     if (documentSnapshot.exists) {
@@ -41,14 +76,49 @@ class DatabaseService {
     }
   }
 
-  Future addDoctorCollection(
-      String DocUid, String docName, String docEmail, String docPhone) async {
+  Future getPatientDetails(String? uid) async {
+    DocumentSnapshot documentSnapshot = await userCollection.doc(uid).get();
+    if (documentSnapshot.exists) {
+      Map<String, dynamic> data =
+          documentSnapshot.data() as Map<String, dynamic>;
+      dynamic name = data['name'];
+      dynamic phone = data["phone"];
+      dynamic gender = data["sex"];
+      dynamic bloodGroup = data["bloodGroup"];
+      dynamic allergies = data["Allergies"];
+      dynamic dob = data["dob"];
+      var dobDate = DateTime.parse(dob);
+
+// Calculate the difference between dob and current date in years
+      var age = DateTime.now().difference(dobDate).inDays ~/ 365;
+
+      print("Age is $age");
+
+      // print("initialised" + initialised);r
+      List<dynamic> details = [
+        name,
+        phone,
+        gender,
+        bloodGroup,
+        allergies,
+        age,
+      ];
+
+      return details;
+    } else {
+      print('Document does not exist!');
+      return null;
+    }
+  }
+
+  Future addDoctorCollection(String DocUid, String docName, String docEmail,
+      String docPhone, String category) async {
     return await userCollection.doc(uid).collection('doctors').doc(DocUid).set({
       'name': docName,
       'email': docEmail,
       'phone': docPhone,
       'qualification': null,
-      'category': null,
+      'category': category,
       'consulationFee': null,
       'timings': null,
       'aimNumber': null,
@@ -160,6 +230,36 @@ class DatabaseService {
       'emergencyContact': emergencyContact,
       'userType': 'patient',
     });
+  }
+
+  Future getAppointmentList(String uid) async {
+    var appointmentList = [];
+
+    var appointmentCollection = FirebaseFirestore.instance
+        .collection("appointments")
+        .where("doctorUid", isEqualTo: uid);
+
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await appointmentCollection.get();
+    print(querySnapshot.docs[0].data()['slotBooked']);
+
+    appointmentList = querySnapshot.docs
+        .map((doc) => AppointmentDetails(
+              appointmentId: doc.id,
+              slotBooked: doc["slotBooked"],
+              doctorUid: doc["doctorUid"],
+              sessionTime: doc["sessionTime"],
+              consultationFee: doc["consultationFee"],
+              bookingStatus: doc["bookingStatus"],
+              timeOfBooking: doc["timeOfBooking"],
+              patientUid: doc["patientUid"],
+              date: doc["date"],
+              code: doc["code"],
+            ))
+        .toList();
+    print("APPOINTMENTS LIST");
+    print(appointmentList);
+    return appointmentList;
   }
 
   Future<List<dynamic>> getDoctorDetails(String uid) async {

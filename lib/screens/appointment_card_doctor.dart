@@ -3,21 +3,53 @@ import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/services/auth.dart';
 import 'package:signup_login/services/database.dart';
 
-class AppointmentCard extends StatelessWidget {
-  final String doctorName;
+class AppointmentCardDoctor extends StatelessWidget {
+  final String patientName;
   final dynamic slotTime;
   final String sessionTime;
   final String consultationFee;
   final String date;
   final String status;
 
-  AppointmentCard(
-      {required this.doctorName,
+  AppointmentCardDoctor(
+      {required this.patientName,
       required this.slotTime,
       required this.date,
       required this.sessionTime,
       required this.consultationFee,
       required this.status});
+
+  Widget _getPatientDetails(String patientUid) {
+    //Change this to Patient Name
+    DatabaseService _database = DatabaseService();
+    AuthService _auth = AuthService();
+    return FutureBuilder(
+        future: _database.getPatientDetails(patientUid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              print("${snapshot.error}");
+              return Text('Error: ${snapshot.error}');
+            }
+
+            var details = snapshot.data;
+            // print("OBTAINING FROM Dtabase Service");
+            // print(details);
+            //[name, phone, sex, bloodGroup, allergies,age]
+            var name = details![0];
+            var phone = details![1];
+            var sex = details![2];
+            var bloodGroup = details![3];
+            var allergies = details![4];
+            var age = details![5];
+
+            return Text("$name");
+          } else {
+            return const CircularProgressIndicator();
+          }
+        });
+  }
+
   Widget _getDoctorName(String doctorUid) {
     DatabaseService _database = DatabaseService();
     AuthService _auth = AuthService();
@@ -34,17 +66,9 @@ class AppointmentCard extends StatelessWidget {
             // print("OBTAINING FROM Dtabase Service");
             // print(details);
             var name = details![0];
-            return Text(
-              "$name",
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              ),
-            );
+            return Text("$name");
           } else {
-            return const LinearProgressIndicator(
-              color: Color(0xff38e7e7),
-            );
+            return const CircularProgressIndicator();
           }
         });
   }
@@ -72,7 +96,7 @@ class AppointmentCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _getDoctorName(doctorName),
+                _getPatientDetails(patientName),
                 const SizedBox(height: 8.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -96,7 +120,7 @@ class AppointmentCard extends StatelessWidget {
                 const SizedBox(height: 8.0),
                 Row(
                   children: [
-                    const Icon(Icons.monetization_on),
+                    const Icon(Icons.currency_rupee),
                     const SizedBox(width: 8.0),
                     Text('\$$consultationFee'),
                   ],

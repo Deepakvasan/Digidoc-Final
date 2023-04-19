@@ -4,6 +4,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:signup_login/screens/appointmentCard.dart';
 import 'package:signup_login/screens/appointmentPage.dart';
+import 'package:signup_login/screens/appointment_page_summary_patient.dart';
 import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/screens/patient_home.dart';
 import 'package:signup_login/services/auth.dart';
@@ -49,6 +50,7 @@ class _AppointmentListState extends State<AppointmentList> {
             bookingStatus: appointmentData['status'],
             timeOfBooking: appointmentData['timeOfBooking'],
             doctorUid: appointmentData['doctorUid'],
+            patientUid: appointmentData['patientUid'],
             date: appointmentData['date'],
             code: appointmentData['code'],
           );
@@ -64,6 +66,7 @@ class _AppointmentListState extends State<AppointmentList> {
           }
 
           print(appointmentBookedDetailsList);
+          appointmentBookedDetailsList.sort();
           // Do something with the appointmentDetails object, such as adding it to a list
         } else {
           print('No documents found in the appointments collection.');
@@ -100,6 +103,7 @@ class _AppointmentListState extends State<AppointmentList> {
             bookingStatus: appointmentData['status'],
             timeOfBooking: appointmentData['timeOfBooking'],
             doctorUid: appointmentData['doctorUid'],
+            patientUid: appointmentData['patientUid'],
             date: appointmentData['date'],
             code: appointmentData['code'],
           );
@@ -115,6 +119,7 @@ class _AppointmentListState extends State<AppointmentList> {
           }
 
           print(appointmentOtherDetailsList);
+          appointmentOtherDetailsList.sort();
           // Do something with the appointmentDetails object, such as adding it to a list
         } else {
           print('No documents found in the appointments collection.');
@@ -173,6 +178,7 @@ class _AppointmentListState extends State<AppointmentList> {
                                     consultationFee:
                                         appointmentDetails.consultationFee,
                                     date: appointmentDetails.date,
+                                    status: appointmentDetails.bookingStatus,
                                   ),
                                   onTap: () {
                                     Navigator.push(
@@ -245,12 +251,14 @@ class _AppointmentListState extends State<AppointmentList> {
                                     consultationFee:
                                         appointmentDetails.consultationFee,
                                     date: appointmentDetails.date,
+                                    status: appointmentDetails.bookingStatus,
                                   ),
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => AppointmentPage(
+                                          builder: (context) =>
+                                              AppointmentPageSummaryPatient(
                                                 appointmentDetails:
                                                     appointmentDetails,
                                               )),
