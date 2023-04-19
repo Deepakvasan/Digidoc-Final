@@ -473,89 +473,87 @@ class _FixTimingsOfDoctorState extends State<FixTimingsOfDoctor> {
                 ),
                 Text("${error}"),
                 Material(
-                    elevation: 5,
-                    borderRadius: BorderRadius.circular(7.73),
-                    color: Theme.of(context).primaryColor,
-                    child: MaterialButton(
-                        child: Text("Complete"),
-                        padding: EdgeInsets.fromLTRB(6, 19, 6, 19),
-                        minWidth: MediaQuery.of(context).size.width,
-                        onPressed: () async {
-                          if (basicFormKey.currentState?.validate() ?? false) {
-                            for (var day in _schedule.keys) {
-                              if (!_schedule[day]!['available']) {
-                                continue;
-                              } else {
-                                var start = _schedule[day]!['start_time'];
+                  elevation: 5,
+                  borderRadius: BorderRadius.circular(7.73),
+                  color: Theme.of(context).primaryColor,
+                  child: MaterialButton(
+                    child: Text("Complete"),
+                    padding: EdgeInsets.fromLTRB(6, 19, 6, 19),
+                    minWidth: MediaQuery.of(context).size.width,
+                    onPressed: () async {
+                      if (basicFormKey.currentState?.validate() ?? false) {
+                        for (var day in _schedule.keys) {
+                          if (!_schedule[day]!['available']) {
+                            continue;
+                          } else {
+                            var start = _schedule[day]!['start_time'];
 
-                                var end = _schedule[day]!['end_time'];
+                            var end = _schedule[day]!['end_time'];
 
-                                if (start == null || end == null) {
-                                  setState(() {
-                                    error = "Timings cant be empty";
-                                  });
-                                } else if (end.hour < start.hour ||
-                                    (end.hour == start.hour &&
-                                        end.minute < start.minute)) {
-                                  setState(() {
-                                    error =
-                                        "End timings cant be before start tiimings";
-                                    ;
-                                  });
-                                  print(error);
-                                } else if ((end.hour - start.hour) * 60 +
-                                        (end.minute - start.minute).abs() <
-                                    int.parse(
-                                        ConsultationTimeFeeController.text)) {
-                                  setState(() {
-                                    error =
-                                        "Total session timings cant be less than the time for one appointment !";
-                                    ;
-                                  });
-                                  print(error);
-                                } else {
-                                  _schedule.forEach((key, value) {
-                                    print('$key:');
-                                    _schedule[key]!['start_time'] =
-                                        timeOfDayToMap(
-                                            _schedule[key]!['start_time']);
-                                    _schedule[key]!['end_time'] =
-                                        timeOfDayToMap(
-                                            _schedule[key]!['end_time']);
-                                    value.forEach((innerKey, innerValue) {
-                                      print('  $innerKey: $innerValue');
-                                    });
-                                  });
-                                  // Satisfied
-                                  String? uid = _auth.getCurrentUserUid();
-                                  DatabaseService _database =
-                                      DatabaseService(uid: uid);
-                                  try {
-                                    await _database.updateDoctorTimings(
-                                        _schedule,
-                                        ConsultationTimeFeeController.text);
-                                    print("Pushed to firebase");
-                                    setState() {
-                                      error = "";
-                                    }
-
-                                    Navigator.of(context).pushReplacement(
-                                        new MaterialPageRoute(
-                                            builder: (BuildContext context) =>
-                                                DoctorHome()));
-                                  } catch (e) {
-                                    error = e.toString();
-                                    print("Here");
-                                    print(e.toString());
-                                  }
+                            if (start == null || end == null) {
+                              setState(() {
+                                error = "Timings cant be empty";
+                              });
+                            } else if (end.hour < start.hour ||
+                                (end.hour == start.hour &&
+                                    end.minute < start.minute)) {
+                              setState(() {
+                                error =
+                                    "End timings cant be before start tiimings";
+                                ;
+                              });
+                              print(error);
+                            } else if ((end.hour - start.hour) * 60 +
+                                    (end.minute - start.minute).abs() <
+                                int.parse(ConsultationTimeFeeController.text)) {
+                              setState(() {
+                                error =
+                                    "Total session timings cant be less than the time for one appointment !";
+                                ;
+                              });
+                              print(error);
+                            } else {
+                              _schedule.forEach((key, value) {
+                                print('$key:');
+                                _schedule[key]!['start_time'] = timeOfDayToMap(
+                                    _schedule[key]!['start_time']);
+                                _schedule[key]!['end_time'] =
+                                    timeOfDayToMap(_schedule[key]!['end_time']);
+                                value.forEach((innerKey, innerValue) {
+                                  print('  $innerKey: $innerValue');
+                                });
+                              });
+                              // Satisfied
+                              String? uid = _auth.getCurrentUserUid();
+                              DatabaseService _database =
+                                  DatabaseService(uid: uid);
+                              try {
+                                await _database.updateDoctorTimings(_schedule,
+                                    ConsultationTimeFeeController.text);
+                                print("Pushed to firebase");
+                                setState() {
+                                  error = "";
                                 }
+
+                                Navigator.of(context).pushReplacement(
+                                    new MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            DoctorHome()));
+                              } catch (e) {
+                                error = e.toString();
+                                print("Here");
+                                print(e.toString());
                               }
                             }
-                          } else {
-                            print("Cant proceed");
-                            error = "Form not validated";
                           }
-                        })),
+                        }
+                      } else {
+                        print("Cant proceed");
+                        error = "Form not validated";
+                      }
+                    },
+                  ),
+                ),
               ],
             ),
           ),

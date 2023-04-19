@@ -37,21 +37,37 @@ class ClinicDetails {
   });
 }
 
-class AppointmentDetails {
+class AppointmentDetails implements Comparable<AppointmentDetails> {
   dynamic appointmentId;
   dynamic slotBooked;
   dynamic doctorUid;
+  dynamic patientUid;
   dynamic sessionTime;
   dynamic consultationFee;
   dynamic timeOfBooking;
   dynamic bookingStatus;
   dynamic date;
   dynamic code;
-
+  final _months = [
+    '',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
   AppointmentDetails({
     required this.appointmentId,
     required this.slotBooked,
     required this.doctorUid,
+    required this.patientUid,
     required this.sessionTime,
     required this.consultationFee,
     required this.bookingStatus,
@@ -66,6 +82,7 @@ class AppointmentDetails {
       other.slotBooked == slotBooked &&
       other.consultationFee == consultationFee &&
       other.sessionTime == sessionTime &&
+      other.patientUid == patientUid &&
       other.bookingStatus == bookingStatus &&
       other.timeOfBooking == timeOfBooking &&
       other.doctorUid == doctorUid &&
@@ -80,6 +97,7 @@ class AppointmentDetails {
       bookingStatus.hashCode ^
       timeOfBooking.hashCode ^
       doctorUid.hashCode ^
+      patientUid.hashCode ^
       date.hashCode ^
       code.hashCode;
 
@@ -92,6 +110,35 @@ class AppointmentDetails {
     print(this.doctorUid);
     print(this.date);
     print(code);
+  }
+
+  @override
+  int compareTo(AppointmentDetails other) {
+    var dateParts = this.date.split(',');
+    var month = _months.indexOf(dateParts[0]);
+    var day = int.parse(dateParts[1]);
+    var year = int.parse(dateParts[2]);
+
+    var timeParts = this.slotBooked;
+    var hour = timeParts["hour"];
+    var minute = timeParts["minute"];
+
+    var appointmentDateTime = DateTime(year, month, day, hour, minute);
+    // appointmentDateTime = appointmentDateTime.add(Duration(hours: 5, minutes: 30));
+
+    var otherDateParts = other.date.split(',');
+    var otherMonth = _months.indexOf(otherDateParts[0]);
+    var otherDay = int.parse(otherDateParts[1]);
+    var otherYear = int.parse(otherDateParts[2]);
+
+    var otherTimeParts = other.slotBooked;
+    var otherHour = otherTimeParts["hour"];
+    var otherMinute = otherTimeParts["minute"];
+
+    var otherAppointmentDateTime =
+        DateTime(otherYear, otherMonth, otherDay, otherHour, otherMinute);
+
+    return appointmentDateTime.compareTo(otherAppointmentDateTime);
   }
 }
 
@@ -138,6 +185,7 @@ class _PatientHomeState extends State<PatientHome> {
             bookingStatus: appointmentData['status'],
             timeOfBooking: appointmentData['timeOfBooking'],
             doctorUid: appointmentData['doctorUid'],
+            patientUid: appointmentData['patientUid'],
             date: appointmentData['date'],
             code: appointmentData['code'],
           );
@@ -153,6 +201,7 @@ class _PatientHomeState extends State<PatientHome> {
           }
 
           print(appointmentDetailsList);
+          appointmentDetailsList.sort();
           // Do something with the appointmentDetails object, such as adding it to a list
         } else {
           print('No documents found in the appointments collection.');
@@ -735,6 +784,8 @@ class _PatientHomeState extends State<PatientHome> {
                                                   appointmentDetails
                                                       .consultationFee,
                                               date: appointmentDetails.date,
+                                              status: appointmentDetails
+                                                  .bookingStatus,
                                             ),
                                             onTap: () {
                                               Navigator.push(

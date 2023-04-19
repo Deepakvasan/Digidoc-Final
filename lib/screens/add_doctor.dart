@@ -18,6 +18,7 @@ class _AddDoctorState extends State<AddDoctor> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
   GlobalKey<FormState> basicFormKey = GlobalKey<FormState>();
   DatabaseService _database = DatabaseService();
   Widget statusIcon() {
@@ -202,6 +203,15 @@ class _AddDoctorState extends State<AddDoctor> {
                               ? null
                               : "Enter a valid phone number",
                         ),
+                        TextFormField(
+                          controller: _categoryController,
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                          ),
+                          validator: (value) => value!.length > 1
+                              ? null
+                              : "Enter a valid category",
+                        ),
                       ],
                     ),
                   ),
@@ -249,6 +259,7 @@ class _AddDoctorState extends State<AddDoctor> {
                               _nameController.text,
                               _emailController.text,
                               _phoneController.text,
+                              _categoryController.text,
                             );
                             // await doctorsRef.doc(result.uid).set({
                             //   'name': _nameController.text,
@@ -259,6 +270,7 @@ class _AddDoctorState extends State<AddDoctor> {
                             _nameController.clear();
                             _emailController.clear();
                             _phoneController.clear();
+                            _categoryController.clear();
 
                             Navigator.of(context).pop();
                           } else {
