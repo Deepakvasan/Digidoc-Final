@@ -19,7 +19,7 @@ class StartAppointmentPage extends StatefulWidget {
 
 class _StartAppointmentPageState extends State<StartAppointmentPage> {
   String? error = "";
-
+  static GlobalKey<FormState> basicFormKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     // setState(() {
@@ -27,7 +27,7 @@ class _StartAppointmentPageState extends State<StartAppointmentPage> {
     // });
     DatabaseService _database = DatabaseService();
     AppointmentDetails appointmentDetails = widget.appointmentDetails;
-    GlobalKey<FormState> basicFormKey = GlobalKey<FormState>();
+
     TextEditingController _codeController = TextEditingController();
     return Scaffold(
       appBar: AppBar(

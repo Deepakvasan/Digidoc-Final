@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:signup_login/services/mlApi.dart';
+import 'dart:convert';
 
 class HealthForm extends StatefulWidget {
   @override
@@ -17,137 +18,217 @@ class _HealthFormState extends State<HealthForm> {
   String? glucose;
   String? insulin;
   String? bmi;
+  TextEditingController ageController = TextEditingController();
+  TextEditingController sexController = TextEditingController();
+  TextEditingController bpController = TextEditingController();
+  TextEditingController cholestrolController = TextEditingController();
+  TextEditingController wbccController = TextEditingController();
+  TextEditingController rbccController = TextEditingController();
+  TextEditingController glucoseController = TextEditingController();
+  TextEditingController insulinController = TextEditingController();
+  TextEditingController bmiController = TextEditingController();
 
-  String result = "";
+  var result;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // appBar: AppBar(
       //   title: Text('Health Form'),
       // ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "Enter Values to Predict",
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Enter Values to Predict",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Age',
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Age',
+                  ),
+                  controller: ageController,
+                  onChanged: (value) {
+                    setState(() {
+                      age = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    age = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Sex',
+                TextFormField(
+                  controller: sexController,
+                  decoration: InputDecoration(
+                    labelText: 'Sex',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      sex = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    sex = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Blood Pressure',
+                TextFormField(
+                  controller: bpController,
+                  decoration: InputDecoration(
+                    labelText: 'Blood Pressure',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      bp = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    bp = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Cholesterol',
+                TextFormField(
+                  controller: cholestrolController,
+                  decoration: InputDecoration(
+                    labelText: 'Cholesterol',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      cholesterol = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    cholesterol = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'White Blood Cell Count',
+                TextFormField(
+                  controller: wbccController,
+                  decoration: InputDecoration(
+                    labelText: 'White Blood Cell Count',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      wbcc = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    wbcc = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Red Blood Cell Count',
+                TextFormField(
+                  controller: rbccController,
+                  decoration: InputDecoration(
+                    labelText: 'Red Blood Cell Count',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      rbcc = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    rbcc = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Glucose',
+                TextFormField(
+                  controller: glucoseController,
+                  decoration: InputDecoration(
+                    labelText: 'Glucose',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      glucose = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    glucose = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Insulin',
+                TextFormField(
+                  controller: insulinController,
+                  decoration: InputDecoration(
+                    labelText: 'Insulin',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      insulin = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    insulin = value;
-                  });
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'BMI',
+                TextFormField(
+                  controller: bmiController,
+                  decoration: InputDecoration(
+                    labelText: 'BMI',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      bmi = value;
+                    });
+                  },
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    bmi = value;
-                  });
-                },
-              ),
-              ElevatedButton(
-                child: Text('Submit'),
-                onPressed: () {
-                  // EmailService email1 = EmailService();
-                  dynamic res = MlService().predict();
-                  setState(() {
-                    result = res;
-                  });
-                },
-              ),
-              Text(
-                result,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                ElevatedButton(
+                  child: Text('Submit'),
+                  onPressed: () async {
+                    // EmailService email1 = EmailService();
+                    setState(() {
+                      result = MlService().predict(
+                          ageController.text,
+                          sexController.text,
+                          bpController.text,
+                          cholestrolController.text,
+                          wbccController.text,
+                          rbccController.text,
+                          glucoseController.text,
+                          insulinController.text,
+                          bmiController.text);
+                    });
+                  },
                 ),
-              )
-            ],
+                SizedBox(
+                  height: 20,
+                ),
+                // Text("${result[0]}"),
+                // Text("${result[1]}"),
+                // Text("${result[2]}"),
+                FutureBuilder(
+                  future: MlService().predict(
+                      ageController.text,
+                      sexController.text,
+                      bpController.text,
+                      cholestrolController.text,
+                      wbccController.text,
+                      rbccController.text,
+                      glucoseController.text,
+                      insulinController.text,
+                      bmiController.text),
+                  builder: (context, snapshot) {
+                    if (ageController.text.isNotEmpty &&
+                        sexController.text.isNotEmpty &&
+                        bpController.text.isNotEmpty &&
+                        cholestrolController.text.isNotEmpty &&
+                        wbccController.text.isNotEmpty &&
+                        rbccController.text.isNotEmpty &&
+                        glucoseController.text.isNotEmpty &&
+                        insulinController.text.isNotEmpty &&
+                        bmiController.text.isNotEmpty) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return LinearProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        print("MAP");
+                        String hd = snapshot.data["HeartDisease"] == "True"
+                            ? "High"
+                            : "Low";
+                        String kd = snapshot.data["KidneyDisease"] == "True"
+                            ? "High"
+                            : "Low";
+                        String db = snapshot.data["diabetes"] == "True"
+                            ? "High"
+                            : "Low";
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Risk for Common Diseases"),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text('Heart Diseases: $hd'),
+                            Text('Kidney Diseases: $kd'),
+                            Text('Diabetes: $db'),
+                          ],
+                        );
+                      }
+                    } else {
+                      return LinearProgressIndicator();
+                    }
+                  },
+                )
+              ],
+            ),
           ),
         ),
       ),

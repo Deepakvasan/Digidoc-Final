@@ -13,7 +13,8 @@ const List<String> typeOfReports = [
 ];
 
 class Reports extends StatefulWidget {
-  const Reports({super.key});
+  final String patientUid;
+  const Reports({super.key, required this.patientUid});
   @override
   State<Reports> createState() => _ReportsState();
 }
@@ -21,13 +22,15 @@ class Reports extends StatefulWidget {
 class _ReportsState extends State<Reports> {
   @override
   Widget build(BuildContext context) {
+    print("Patient uid in reports ${widget.patientUid}");
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => UploadDocument(),
+              builder: (context) =>
+                  UploadDocument(patientUid: widget.patientUid),
             ),
           );
         },
@@ -58,6 +61,7 @@ class _ReportsState extends State<Reports> {
                   return ReportListItem(
                     parentContext: context,
                     name: typeOfReports[index],
+                    patientUid: widget.patientUid,
                   );
                 },
                 itemCount: typeOfReports.length,
@@ -73,8 +77,12 @@ class _ReportsState extends State<Reports> {
 class ReportListItem extends StatelessWidget {
   final BuildContext parentContext;
   final String name;
+  final String patientUid;
 
-  ReportListItem({required this.parentContext, required this.name});
+  ReportListItem(
+      {required this.parentContext,
+      required this.name,
+      required this.patientUid});
 
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -82,7 +90,8 @@ class ReportListItem extends StatelessWidget {
         Navigator.push(
           parentContext,
           MaterialPageRoute(
-            builder: (context) => ReportView(reportType: name),
+            builder: (context) =>
+                ReportView(reportType: name, patientUid: patientUid),
           ),
         );
       },

@@ -43,12 +43,12 @@ class _DoctorHomeState extends State<DoctorHome> {
             var clinicAddressLine2 = details![11];
 
             return Column(children: <Widget>[
-              SizedBox(
-                height: 10,
-              ),
               Text(
                 "Greetings, Dr. $name",
                 style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 10,
               ),
             ]);
           } else {
@@ -82,6 +82,10 @@ class _DoctorHomeState extends State<DoctorHome> {
 
     return Scaffold(
       appBar: AppBar(
+          title: Text(
+            "Doctor's Homepage",
+            style: TextStyle(fontSize: 21.0),
+          ),
           backgroundColor: Theme.of(context).primaryColor,
           foregroundColor: Theme.of(context).colorScheme.secondaryContainer,
           actions: [
@@ -108,6 +112,9 @@ class _DoctorHomeState extends State<DoctorHome> {
           children: [
             SizedBox(height: 20),
             _getDoctorName(_auth.getCurrentUserUid()!),
+            SizedBox(
+              height: 15.0,
+            ),
             Text(
               "Your Appointments",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

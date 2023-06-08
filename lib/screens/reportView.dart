@@ -6,8 +6,9 @@ import '../services/storage_service.dart';
 
 class ReportView extends StatefulWidget {
   final String reportType;
+  final String patientUid;
 
-  ReportView({required this.reportType});
+  ReportView({required this.reportType, required this.patientUid});
 
   @override
   State<ReportView> createState() => _ReportViewState();
@@ -15,10 +16,9 @@ class ReportView extends StatefulWidget {
 
 class _ReportViewState extends State<ReportView> {
   @override
-  final Storage storage = Storage();
   String test = "";
   String down = "";
-
+  late Storage storage;
   Future<void> _deleteConfirmation(
       BuildContext context, String name, String type) async {
     return showDialog<void>(
@@ -61,6 +61,7 @@ class _ReportViewState extends State<ReportView> {
   }
 
   Widget build(BuildContext context) {
+    final Storage storage = Storage(widget.patientUid);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.reportType),

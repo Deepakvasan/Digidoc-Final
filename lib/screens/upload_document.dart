@@ -9,7 +9,8 @@ import 'package:path/path.dart';
 import '../services/storage_service.dart';
 
 class UploadDocument extends StatefulWidget {
-  const UploadDocument({super.key});
+  final String? patientUid;
+  const UploadDocument({super.key, required this.patientUid});
 
   @override
   State<UploadDocument> createState() => _UploadDocumentState();
@@ -18,8 +19,6 @@ class UploadDocument extends StatefulWidget {
 class _UploadDocumentState extends State<UploadDocument> {
   @override
   // Service classes
-
-  Storage storage = Storage();
 
   // State variables
 
@@ -41,6 +40,8 @@ class _UploadDocumentState extends State<UploadDocument> {
   TextEditingController nameController = TextEditingController();
 
   Widget build(BuildContext context) {
+    print("Paitent uid in uploading ${widget.patientUid}");
+    Storage storage = Storage(widget.patientUid);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -285,10 +286,10 @@ class _UploadDocumentState extends State<UploadDocument> {
                       context,
                     )
                         .then((value) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Home(),
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Document uploaded successfully!!"),
                         ),
                       );
                     });

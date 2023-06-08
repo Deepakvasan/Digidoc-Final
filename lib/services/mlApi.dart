@@ -2,8 +2,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class MlService {
-  Future predict() async {
-    final url = Uri.parse('http://39cf-34-90-223-75.ngrok-free.app');
+  Future predict(
+      String age,
+      String sex,
+      String bp,
+      String cholestrol,
+      String wbcc,
+      String rbcc,
+      String glucose,
+      String insulin,
+      String bmi) async {
+    final url = Uri.parse('http://194f-35-230-57-199.ngrok-free.app');
     final response = await http.post(
       url,
       headers: {
@@ -11,18 +20,22 @@ class MlService {
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
-        "age": "48",
-        "sex": "1",
-        "bp": "98",
-        "cholesterol": "212",
-        "wbcc": "7900",
-        "rbcc": "3.9",
-        "glucose": "129",
-        "insulin": "94",
-        "bmi": "35.2"
+        "age": age,
+        "sex": sex,
+        "bp": bp,
+        "cholesterol": cholestrol,
+        "wbcc": wbcc,
+        "rbcc": rbcc,
+        "glucose": glucose,
+        "insulin": insulin,
+        "bmi": bmi,
       }),
     );
     print(response.body);
-    return response;
+    var responses = jsonDecode(response.body);
+    print("RESPONSES");
+    print(responses);
+    print(responses.runtimeType);
+    return responses;
   }
 }

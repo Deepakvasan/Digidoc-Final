@@ -8,6 +8,7 @@ import 'package:signup_login/screens/in_appointment_page_home.dart';
 import 'package:signup_login/screens/login_screen.dart';
 import 'package:signup_login/screens/ml_page.dart';
 import 'package:signup_login/screens/patient_home.dart';
+import 'package:signup_login/screens/reports.dart';
 import 'package:signup_login/services/auth.dart';
 
 class InAppointmentPageChooser extends StatefulWidget {
@@ -26,16 +27,19 @@ class InAppointmentPageChooser extends StatefulWidget {
 class _InAppointmentPageChooserState extends State<InAppointmentPageChooser> {
   final AuthService _auth = AuthService();
   int currentIndex = 0;
-
   @override
   Widget build(BuildContext context) {
+    print("Patient uid in chooser");
+    print(widget.appointmentDetails.patientUid);
     final screens = [
       Center(
         child: InAppointmentPageHome(
             appointmentDetails: widget.appointmentDetails),
       ),
       Center(
-        child: Text('Reports', style: TextStyle(fontSize: 60)),
+        child: Reports(
+          patientUid: widget.appointmentDetails.patientUid,
+        ),
       ),
       Center(child: HealthForm()),
     ];

@@ -88,6 +88,8 @@ class _InAppointmentPageHomeState extends State<InAppointmentPageHome> {
     AppointmentDetails appointmentDetails = widget.appointmentDetails;
     final TextEditingController _diagnosisController = TextEditingController();
     GlobalKey<FormState> basicFormKey = GlobalKey<FormState>();
+    print("Patient uid");
+    print(widget.appointmentDetails.patientUid);
 
     Widget submitDiagnosisButton = Material(
       elevation: 5,
@@ -115,7 +117,6 @@ class _InAppointmentPageHomeState extends State<InAppointmentPageHome> {
                       onPressed: () async {
                         if (basicFormKey.currentState?.validate() ?? false) {
                           //Change status to attended.
-
                         }
                         //Redirect to InAppointmentPage
 

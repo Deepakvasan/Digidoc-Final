@@ -93,6 +93,7 @@ flutter:
     - assets/kauvery-5.jpg
     - assets/Images/
     - assets/listIcons/
+    - assets/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

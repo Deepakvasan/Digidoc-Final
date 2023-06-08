@@ -285,7 +285,7 @@ class _BookAppointmentState extends State<BookAppointment> {
                 ],
               ),
               body: Center(
-                child: CircularProgressIndicator(),
+                child: Center(child: CircularProgressIndicator()),
               ),
             );
           }
@@ -380,7 +380,7 @@ class _BookAppointmentState extends State<BookAppointment> {
         foregroundColor: Theme.of(context).colorScheme.secondaryContainer,
       ),
       body: isLoading
-          ? CircularProgressIndicator()
+          ? Center(child: CircularProgressIndicator())
           : Padding(
               padding: EdgeInsets.all(8),
               child: Column(

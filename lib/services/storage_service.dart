@@ -11,10 +11,13 @@ class Storage {
       firebase_storage.FirebaseStorage.instance;
   final AuthService auth = AuthService();
   String? uid = "";
+  String? doctoruid = "";
   CollectionReference? reports;
-  Storage() {
+  Storage(this.uid) {
     reports = FirebaseFirestore.instance.collection("reports");
-    uid = auth.getCurrentUserUid();
+    // uid = auth.getCurrentUserUid();
+    doctoruid = auth.getCurrentUserUid();
+    print("Patient uid in storage class ${uid}");
   }
 
   Future<void> uploadReportData(
@@ -24,7 +27,7 @@ class Storage {
     return reports!.add({
       'filename': filename,
       'reportType': reportType,
-      'uploadedBy': uid,
+      'uploadedBy': doctoruid,
       'uploadedAt': DateTime.now().toString(),
     }).then((value) {
       print("Report Data added");
@@ -47,6 +50,7 @@ class Storage {
     );
     try {
       print("Upload process started");
+      print("Uploading to ${uid}");
       await storage.ref('users/$uid/$reportType/$filename/').putFile(file).then(
         (p0) {
           uploadReportData(filename, reportType).then((value) {
